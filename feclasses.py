@@ -4,9 +4,11 @@
 
 #==============TODO==============#
 #   1. Finalize weapon exp func  #
-#   (In feweapons)               # 
-#   2. Finalize enemy drop-out   #
-#  and ally drop-out system      #
+#   (In feweapons, say when rank #
+#   up)                          # 
+#   2. Finish equip functions and#
+#  the check if unit has enough  #
+#  weapon mastery to use a weapon#
 #================================#
 
 #=========Recent Updates===========#
@@ -14,6 +16,8 @@
 # attacks and kills                #
 # Finished in class weapon rank    #
 # display                          #
+# Made calculation function,       #
+# calculates damage and hit rate   #
 #==================================#
 from random import randint
 from festaples import *
@@ -49,8 +53,10 @@ class Person:
         self.exp = 0 #experience
         self.gift = 0 #amount of exp given when killed, only really matters for allies
         self.CLASS = "Person"
+        self.MOVE = 5
         self.promoteC = "Person" #what class promotes to
         self.caps = [40,20,20,20,20,20,20]
+        self.sym = "人" #symbol as appeared on map
     def losehp(self,damage):
         damage_t = damage
         if damage_t < 0:
@@ -138,29 +144,58 @@ class Person:
             promoted = Person(self.name,self.maxhp,self.strength,self.speed,self.dexterity,self.defense,self.luck,self.resistance,self.constitution,self.growths)
             promoted.wskl = self.wskl
         return promoted
+    def add_item(self,item):
+        pass
+    #finish this function later You Zhou
     
 #Murderer Class is basis for all fighting classes
 class Murderer(Person):
     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
         super(Murderer,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Murderer"
+    def calculate(self,enemy,terr=0):
+        if not self.alive:
+            return False
+        global weaponTriangle
+        mod = 0
+        exdam = 0
+        for a,d in weaponTriangle:
+            if self.equip.typ == a:
+                if enemy.equip.typ == d:
+                    mod = 20 #modifier for accuracy based on weapon triangle
+                    exdam = 1 #extra damage
+                    break
+            if self.equip.typ == d:
+                if enemy.equip.typ == a:
+                    mod = -20
+                    exdam = -1
+                    break
+        print(self.name)
+        print("HP:",self.hp,"/",self.maxhp)
+        print("Hit:",self.dexterity*2 + self.equip.acc + self.luck//2 + mod + terr - enemy.speed*2 - enemy.luck)
+        spdam = "x2" if self.speed - 4 >= enemy.speed else ""
+        print("Dam:",self.equip.damage(self,enemy)+exdam,spdam)
+        print("Crit:",self.dexterity//2 - enemy.luck + self.equip.crit)
     def attack(self,enemy,terr=0):
         if not self.alive:
             return False
         global weaponTriangle
         mod = 0
+        exdam = 0
         for a,d in weaponTriangle:
             if self.equip.typ == a:
                 if enemy.equip.typ == d:
                     mod = 20 #modifier for accuracy based on weapon triangle
+                    exdam = 1 #extra damage
                     break
             if self.equip.typ == d:
                 if enemy.equip.typ == a:
                     mod = -20
+                    exdam = -1
                     break
         #calculates if enemy was hit   
         if self.dexterity*2 + self.luck//2 + self.equip.acc - enemy.speed*2 - enemy.luck + terr + mod > randint(0,99):
-            damage = self.equip.damage(self,enemy) #damage done to enemy
+            damage = self.equip.damage(self,enemy)+exdam #damage done to enemy
             self.wskl[self.equip.typ] += self.equip.wexp #increasing wexp
             expgain = damage-self.level #increasing exp
             if expgain > 20:
@@ -173,32 +208,41 @@ class Murderer(Person):
                 print(enemy.name,"died") #if enemy dies it will print
                 expgain += enemy.gift - self.level #adds more exp when en dies
             self.gainExp(expgain)
+            return 1
         else:
             print(self.name,"attacked",enemy.name,"but",enemy.name,"dodged")
+            return 0
+    def equip_w(self,weapon):
+        #equips weapon
+        if self.wskl[weapon.typ] >= weapon.mast:
+            self.equip = weapon
+            return 1
+        else:
+            return 0
 #-----------MAGE-------------#
 class Mage(Murderer):
     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
         super(Mage,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Mage"
-        self.mast5 = 2
+        self.promoteC = "Sage"
 #----------KNIGHT------------#
 class Knight(Murderer):
     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
         super(Knight,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Knight"
-        self.mast2 = 2
+        self.promoteC = "General"
+        self.MOVE = 4
 #---------MYRMIDON-----------#
 class Myrmidon(Murderer):
     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
         super(Myrmidon,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Myrmidon"
-    def losehp(self,damage):
-        return super(Myrmidon,self).losehp(damage)
-    def gainhp(self,hp):
-        super(Myrmidon,self).gainhp(hp)
-#INCOMPLETE BELOW#
+        self.promoteC = "Swordmaster"
+#---------CAVALIER-----------#
 class Cavalier(Murderer):
     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
         super(Cavalier,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Cavalier"
         self.mounted = True
+        self.promoteC = "Paladin"
+        self.MOVE = 7
