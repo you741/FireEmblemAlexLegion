@@ -3,19 +3,29 @@
 #Fire Emblem Classes
 
 #==============TODO==============#
-#                                #
+#   1. Finalize weapon exp func  #
+#   (In feweapons)               # 
+#   2. Finalize enemy drop-out   #
+#  and ally drop-out system      #
 #================================#
 
-#=========Recent Updates=========#
-# Finalized attack methods       #
-#================================#
+#=========Recent Updates===========#
+# Finalized experience gain through#
+# attacks and kills                #
+# Finished in class weapon rank    #
+# display                          #
+#==================================#
 from random import randint
+from festaples import *
 from feweapons import *
 #parent of all units - Person
+weaponTriangle = [("Sword","Axe"),("Axe","Lance"),("Lance","Sword"),("Anima","Light"),("Dark","Anima"),("Light","Dark")]
+#^list full of wt advantages (adv,disadv)
+
 class Person:
-    def __init__(self,name,hp,stren,spd,dex,defen,lck,res=0,con=5,growths=[50,50,50,50,50,50,50]):
-        self.name = name
-        self.hp = hp
+    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
+        self.name = name #units name
+        self.hp = hp #stats
         self.maxhp = hp
         self.strength = stren
         self.speed = spd
@@ -24,24 +34,23 @@ class Person:
         self.luck = lck
         self.resistance = res
         self.constitution = con
-        self.mounted = False
-        self.alive = True
-        self.equip = Weapon("No weapon",0,0,0,0,"")
-        self.mast1 = 0 #sword mastery
-        self.mast2 = 0 #axe mastery
-        self.mast3 = 0 #lance mastery
-        self.mast4 = 0 #bow mastery
-        self.mast5 = 0 #anima mastery
-        self.mast6 = 0 #dark mastery
-        self.mast7 = 0 #light mastery
-        self.mast8 = 0 #staff mastery
-        self.x = 0
+        self.mounted = False #is unit mounted?
+        self.alive = True #is unit alive?
+        self.equip = Weapon("No weapon",0,0,0,0,"",0)
+        self.wskl = {"Sword":0,"Lance":0,"Axe":0,"Bow":0,
+                     "Anima":0,"Dark":0,"Light":0,"Staff":0}#Weapon skill levels
+        self.x = 0 #unit's position
         self.y = 0
         self.items = []
         self.growths = growths #growths are in the following format
                           #[hp,str,dex,spd,lck,def,res]
         self.level = 1
+        self.canLevel = True #can unit level?
+        self.exp = 0 #experience
+        self.gift = 0 #amount of exp given when killed, only really matters for allies
         self.CLASS = "Person"
+        self.promoteC = "Person" #what class promotes to
+        self.caps = [40,20,20,20,20,20,20]
     def losehp(self,damage):
         damage_t = damage
         if damage_t < 0:
@@ -52,6 +61,7 @@ class Person:
             self.alive = False
         if damage_t == 0:
             damage_t = "no"
+        print(self.name,"has",self.hp,"HP")
         return damage_t
     def gainhp(self,hp):
         self.hp += hp
@@ -64,67 +74,123 @@ class Person:
         print("Level:",self.level)
         print("HP: ",self.hp,"/",self.maxhp,sep="")
         print("Stength:",self.strength)
-        print("Speed:",self.speed)
         print("Dexterity:",self.dexterity)
+        print("Speed:",self.speed)
         print("Luck:",self.luck) 
         print("Defense:",self.defense)
         print("Resistance:",self.resistance)
         print("Constitution:",self.constitution)
         print("Equipped weapon:",self.equip.name)
+        rankL = ["F","E","D","C","B","A","S"]
+        for k,t in enumerate(self.wskl):
+            if self.wskl[t] >= 100:
+                print(t,rankL[self.wskl[t]//100])
     def levelUp(self):
-        self.level += 1
-        for i in range(len(self.growths)):
-            if i == 0 and self.growths[i] > randint(0,99):
-                self.maxhp += 1
-                print("Maximum HP increased to",self.maxhp)
-            if i == 1 and self.growths[i] > randint(0,99):
-                self.strength += 1
-                print("Strength increased to",self.strength)
-            if i == 2 and self.growths[i] > randint(0,99):
-                self.dexterity += 1
-                print("Dexterity increased to",self.dexterity)
-            if i == 3 and self.growths[i] > randint(0,99):
-                self.speed += 1
-                print("Speed increased to",self.speed)
-            if i == 4 and self.growths[i] > randint(0,99):
-                self.luck += 1
-                print("Luck increased to",self.luck)
-            if i == 5 and self.growths[i] > randint(0,99):
-                self.defense += 1
-                print("Defense increased to",self.defense)
-            if i == 6 and self.growths[i] > randint(0,99):
-                self.resistance += 1
-                print("Resistance increased to",self.resistance)
-            
+        if self.canLevel:            
+            self.level += 1
+            if self.level >= 20:
+                self.canLevel = False #makes user unable to level past 20
+                self.exp = 0
+            print(self.name,"leveled up!")
+            print(self.CLASS,"level",self.level)
+            for i in range(len(self.growths)):
+                random_number = randint(0,99)
+                if i == 0 and self.growths[i] > random_number:
+                    if not self.maxhp >= self.caps[i]:
+                        self.maxhp += 1
+                        print("Maximum HP increased to",self.maxhp)
+                if i == 1 and self.growths[i] > random_number:
+                    if not self.strength >= self.caps[i]:
+                        self.strength += 1
+                        print("Strength increased to",self.strength)
+                if i == 2 and self.growths[i] > random_number:
+                    if not self.dexterity >= self.caps[i]:
+                        self.dexterity += 1
+                        print("Dexterity increased to",self.dexterity)
+                if i == 3 and self.growths[i] > random_number:
+                    if not self.speed >= self.caps[i]:
+                        self.speed += 1
+                        print("Speed increased to",self.speed)
+                if i == 4 and self.growths[i] > random_number:
+                    if not self.luck >= self.caps[i]:
+                        self.luck += 1
+                        print("Luck increased to",self.luck)
+                if i == 5 and self.growths[i] > random_number:
+                    if not self.defense >= self.caps[i]:    
+                        self.defense += 1
+                        print("Defense increased to",self.defense)
+                if i == 6 and self.growths[i] > random_number:
+                    if not self.resistance >= self.caps[i]:
+                        self.resistance += 1
+                        print("Resistance increased to",self.resistance)
+    def gainExp(self,amount=1):
+        if self.canLevel:
+            self.exp += amount
+            if amount > 100:
+                amount = 100
+            print(self.name,"gained",amount,"experience")
+            if self.exp >= 100:
+                self.exp -= 100
+                self.levelUp()
+            print("Exp:",self.exp,"/100")
+    def promote(self):
+        if promoteC == "Person":
+            promoted = Person(self.name,self.maxhp,self.strength,self.speed,self.dexterity,self.defense,self.luck,self.resistance,self.constitution,self.growths)
+            promoted.wskl = self.wskl
+        return promoted
+    
 #Murderer Class is basis for all fighting classes
 class Murderer(Person):
-    def __init__(self,name,hp,stren,spd,dex,defen,lck,res=0,con=5,growths=[50,50,50,50,50,50,50]):
-        super(Murderer,self).__init__(name,hp,stren,spd,dex,defen,lck,res,con,growths)
+    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
+        super(Murderer,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Murderer"
     def attack(self,enemy,terr=0):
-        if self.dexterity*2 + self.luck//2 + self.equip.acc - enemy.speed*2 - enemy.luck + terr > randint(0,99):
-            damage_t = enemy.losehp(self.equip.damage(self,enemy))
-            print(self.name,"attacked",enemy.name,"for",damage_t,"damage")
+        if not self.alive:
+            return False
+        global weaponTriangle
+        mod = 0
+        for a,d in weaponTriangle:
+            if self.equip.typ == a:
+                if enemy.equip.typ == d:
+                    mod = 20 #modifier for accuracy based on weapon triangle
+                    break
+            if self.equip.typ == d:
+                if enemy.equip.typ == a:
+                    mod = -20
+                    break
+        #calculates if enemy was hit   
+        if self.dexterity*2 + self.luck//2 + self.equip.acc - enemy.speed*2 - enemy.luck + terr + mod > randint(0,99):
+            damage = self.equip.damage(self,enemy) #damage done to enemy
+            self.wskl[self.equip.typ] += self.equip.wexp #increasing wexp
+            expgain = damage-self.level #increasing exp
+            if expgain > 20:
+                expgain = 20 #caps exp gain at 20
+            elif expgain <= 0:
+                expgain = 1 #caps exp gain at 1
+            print(self.name,"attacked",enemy.name,"for",damage,"damage") #prints damage
+            enemy.losehp(damage)#enemy loses hp
             if enemy.hp <= 0:
-                print(enemy.name,"died")
+                print(enemy.name,"died") #if enemy dies it will print
+                expgain += enemy.gift - self.level #adds more exp when en dies
+            self.gainExp(expgain)
         else:
             print(self.name,"attacked",enemy.name,"but",enemy.name,"dodged")
 #-----------MAGE-------------#
 class Mage(Murderer):
-    def __init__(self,name,hp,stren,spd,dex,defen,lck,res=0,con=5,growths=[50,50,50,50,50,50,50]):
-        super(Mage,self).__init__(name,hp,stren,spd,dex,defen,lck,res,con,growths)
+    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
+        super(Mage,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Mage"
         self.mast5 = 2
 #----------KNIGHT------------#
 class Knight(Murderer):
-    def __init__(self,name,hp,stren,spd,dex,defen,lck,res=0,con=5,growths=[50,50,50,50,50,50,50]):
-        super(Knight,self).__init__(name,hp,stren,spd,dex,defen,lck,res,con,growths)
+    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
+        super(Knight,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Knight"
         self.mast2 = 2
 #---------MYRMIDON-----------#
 class Myrmidon(Murderer):
-    def __init__(self,name,hp,stren,spd,dex,defen,lck,res=0,con=5,growths=[50,50,50,50,50,50,50]):
-        super(Myrmidon,self).__init__(name,hp,stren,spd,dex,defen,lck,res,con,growths)
+    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
+        super(Myrmidon,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Myrmidon"
     def losehp(self,damage):
         return super(Myrmidon,self).losehp(damage)
@@ -132,7 +198,7 @@ class Myrmidon(Murderer):
         super(Myrmidon,self).gainhp(hp)
 #INCOMPLETE BELOW#
 class Cavalier(Murderer):
-    def __init__(self,name,hp,stren,spd,dex,defen,lck,res=0,con=5,growths=[50,50,50,50,50,50,50]):
-        super(Cavalier,self).__init__(name,hp,stren,spd,dex,defen,lck,res,con,growths)
+    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
+        super(Cavalier,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Cavalier"
         self.mounted = True
