@@ -14,11 +14,13 @@ class Item():
         self.dur -= 1
         if self.dur <= 0:
             self.intact = False
-            print(name,"broke!")
+            print(self.name,"broke!")
             return True #returns true if broken
         else:
             return False
     def display(self):
+        print(self.name)
+        print(self.dur,"/",self.maxdur)
         if not self.desc == "":
             print(self.desc)
 class Weapon(Item):

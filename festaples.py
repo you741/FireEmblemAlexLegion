@@ -63,14 +63,19 @@ def moveDisp(x,y,move,maxmove,grid,flying=False,waterproof=False):
     else:
         return grid
 def showMap(grid):
-    print("  "+" ".join([str(i) for i in range(len(grid[0]))]))
     for y in range(len(grid)):
         horbar = "" #horizontal bar
+        ydisp = len(grid) - y - 1 #y as displayed on grid
         for x in grid[y]:
             x_fin = x if not x in [str(i) for i in range(1,10)] else "#"
-            horbar += " "+x_fin
-        ydisp = len(grid) - y - 1 #y as displayed on grid
-        print(ydisp,horbar,sep="")
+            horbar += "  "+x_fin
+        spc = "" if ydisp//10 > 0 else " "
+        print(ydisp,spc,horbar,sep="")
+    up_bar = "  " #x-axis
+    for i in range(len(grid[0])):
+        spc = " " if i//10 > 0 else "  "
+        up_bar += spc + str(i)
+    print(up_bar)
     return True
     
 

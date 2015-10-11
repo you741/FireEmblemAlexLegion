@@ -57,6 +57,7 @@ class Person:
         self.promoteC = "Person" #what class promotes to
         self.caps = [40,20,20,20,20,20,20]
         self.sym = "人" #symbol as appeared on map
+        self.attackspeed = spd #attack speed
     def losehp(self,damage):
         damage_t = damage
         if damage_t < 0:
@@ -144,14 +145,24 @@ class Person:
             promoted = Person(self.name,self.maxhp,self.strength,self.speed,self.dexterity,self.defense,self.luck,self.resistance,self.constitution,self.growths)
             promoted.wskl = self.wskl
         return promoted
-    def add_item(self,item):
+    def add_item(self,item,err=True):
         if len(self.items) >= 5:
-            print(self.name,'has a full inventory')
+            if err:
+                print(self.name,'has a full inventory')
             return 0
         else:
-            print(self.name,"added",item.name,"to inventory")
+            if err:
+                print(self.name,"added",item.name,"to inventory")
             self.items.append(item)
-            return 1 
+            return 1
+    def show_items(self,detailed=True):
+        print("----------------------")
+        for i in self.items:
+            if detailed:
+                i.display()
+            else:
+                print(i.name)
+            print("----------------------")
     
 #Murderer Class is basis for all fighting classes
 class Murderer(Person):
@@ -201,7 +212,6 @@ class Murderer(Person):
         #calculates if enemy was hit   
         if self.dexterity*2 + self.luck//2 + self.equip.acc - enemy.speed*2 - enemy.luck + terr + mod > randint(0,99):
             damage = self.equip.damage(self,enemy)+exdam #damage done to enemy
-            self.wskl[self.equip.typ] += self.equip.wexp #increasing wexp
             expgain = damage-self.level #increasing exp
             if expgain > 20:
                 expgain = 20 #caps exp gain at 20
@@ -212,40 +222,54 @@ class Murderer(Person):
             if enemy.hp <= 0:
                 print(enemy.name,"died") #if enemy dies it will print
                 expgain += enemy.gift - self.level #adds more exp when en dies
-            self.gainExp(expgain)
+            self.gainExp(expgain) #increasing exp
+            self.w_experience(self.equip.wexp,self.equip.typ) #increasing wexp
+            #if weapon breaks
             if self.equip.use():
-                self.items.remove(self.equip)
                 eq_newItem = False
-                for i in items:
-                    if type(i) == Weapon:
-                        if self.equip_w(i,False):
+                for i in range(1,len(self.items)):
+                    if type(self.items[i]) == Weapon:
+                        if self.equip_w(self.items[i],False):
                             #tries to equip every item in list.
                             #won't print error
                             eq_newItem = True
+                            del self.items[i]
                             break
                 if not eq_newItem:
-                    self.equip_w(Weapon("No weapon",0,0,0,0,"",0))
+                    self.items.remove(self.equip)
+                    self.equip = Weapon("No weapon",0,0,0,0,"",0)
             return 1
         else:
             print(self.name,"attacked",enemy.name,"but",enemy.name,"dodged")
             return 0
     def equip_w(self,weapon,err=True):
         #equips weapon
-        if self.items.index(weapon) == -1:
-            print("Unit does not have this weapon!")
+        if not weapon in self.items:
+            if err:
+                print("Unit does not have this weapon!")
             return 0
-        if self.equip.name.lower() != "no weapon" and self.wskl[weapon.typ] >= weapon.mast:
+        if not self.equip.name.lower() == "no weapon" and self.wskl[weapon.typ] >= weapon.mast:
             e_index = self.items.index(self.equip)
             w_index = self.items.index(weapon)
             self.items[e_index],self.items[w_index] = weapon,self.equip
         if self.wskl[weapon.typ] >= weapon.mast:
             print(self.name,"equipped",weapon.name)
             self.equip = weapon
+            
+            #changes attackspeed based on weapon
+            if self.equip.wt > self.constitution:
+                self.attackspeed = self.speed - self.equip.wt + self.constitution
+            else:
+                self.attackspeed = self.speed
             return 1
         else:
-            if not err:
+            if err:
                 print(self.name,"has not enough",weapon.typ,"mastery level to use",weapon.name)
             return 0
+    def w_experience(self,wexp_g,typ):
+        if (self.wskl[typ]+wexp_g)//100 > self.wskl[typ]//100:
+            print(typ,"mastery level increased")
+        self.wskl[typ] += wexp_g
 #-----------MAGE-------------#
 class Mage(Murderer):
     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):

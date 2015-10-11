@@ -7,7 +7,6 @@ from festaples import *
 from feclasses import *
 from feweapons import *
 import copy
-#from feweapons import *
 allies = []
 enemies = []
 name = input("Enter your name:\n")
@@ -29,20 +28,20 @@ while askingclass:
     playerclass = input(askmsg)
     if playerclass.lower() == "mage":
         player = Mage(name,18,5,6,5,5,2,5,4,[60,40,60,55,50,20,50])
-        player.equip = fire #edit later
-        player.items.append(fire)
+        player.add_item(copy.deepcopy(fire),False)
+        player.equip_w(player.items[0],False)
         player.wskl["Anima"] = 200
         askingclass = False
     if playerclass.lower() == "knight":
         player = Knight(name,21,6,4,4,3,6,1,10,[80,55,50,35,40,55,20])
-        player.equip = iron_lance #edit later
-        player.items.append(iron_lance)
+        player.add_item(copy.deepcopy(iron_lance),False)
+        player.equip_w(player.items[0],False)
         player.wskl["Lance"] = 200
         askingclass = False
     if playerclass.lower() == "myrmidon":
         player = Myrmidon(name,20,5,6,6,4,4,2,5,[70,40,60,60,45,25,30])
-        player.equip = slim_sword #edit later more info below
-        player.items.append(slim_sword)
+        player.add_item(copy.deepcopy(slim_sword),False)
+        player.equip_w(player.items[0],False)
         player.wskl["Sword"] = 200
         askingclass = False
     if playerclass.lower() == "info":
@@ -56,29 +55,31 @@ player.sym = "P"
 player.x = 3
 player.y = 2
 allies.append(player)
-enemy1 = Murderer("Enemy 1-1",20,6,2,2,0,3,0,8)
+#creating enemy1
+enemy1 = Murderer("Enemy 1",20,6,2,2,0,3,0,8)
 enemy1.canLevel = False
 enemy1.gift = 40
-enemy1.equip = iron_axe #edit this syntax - after item add and equip functions are made
-enemy1.items.append(iron_axe)
+enemy1.add_item(copy.deepcopy(iron_axe),False)
+enemy1.equip_w(enemy1.items[0],False)
 enemy1.sym = "E"
 enemy1.wskl["Axe"] = 200
 enemy1.x = 2
 enemy1.y = 2
 enemies.append(enemy1)
-lvl1map = [["." for i in range(8)]for i in range(8)] #level 1 map
+lvl1map = [["." for i in range(15)]for i in range(12)] #level 1 map
 reg_map = [] #regular map
 stat_map = copy.deepcopy(reg_map) #static map - never changes
 chapter = 1 #chapter we're on
 turn = 1
-franny = Cavalier("Franny",22,6,7,6,5,4,3,8,[85,40,55,50,35,35,25])
+#creating franny
+franny = Cavalier("Franny",22,6,7,6,5,4,3,8,[85,40,55,55,35,35,25])
 franny.level = 3
 franny.wskl["Lance"] = 200
 franny.wskl["Sword"] = 200
-franny.items.append(iron_lance)
-franny.items.append(iron_sword)
-franny.items.append(vulnerary)
-franny.equip = iron_lance
+franny.add_item(copy.deepcopy(iron_lance),False)
+franny.add_item(copy.deepcopy(iron_sword),False)
+franny.add_item(copy.deepcopy(vulnerary),False)
+franny.equip_w(franny.items[0],False)
 franny.sym = "F"
 franny.x = 3
 franny.y = 7
@@ -105,7 +106,8 @@ while running:
             print(askingmsg)
             print("===============================")
             for a in allies:
-                print(a.name)
+                isplayer = "(enter me, not this name)" if a == player else ""
+                print(a.name,isplayer)
             print("===============================")
             ally = input()
             if ally.lower() == "cancel":
@@ -133,9 +135,9 @@ while running:
                                 #ATTACK CODE
                                 a.attack(e)
                                 e.attack(a)
-                                if a.speed >= e.speed + 4:
+                                if a.speed >= e.speed + 4 and e.alive:
                                     a.attack(e)
-                                elif a.speed <= e.speed - 4:
+                                elif a.speed <= e.speed - 4 and a.alive:
                                     e.attack(a)
                                 asking = False
                                 if not a.alive:
@@ -151,7 +153,7 @@ while running:
                     break
                 else:
                     askingmsg = "Not a valid ally. Select an ally to display info:"
-    if comm.upper() == "END":
+    elif comm.upper() == "END":
         turn += 1 #add enemy's turn here
     elif comm.upper() == "DISPLAY":
         #print enemy or ally info. So far only allies done
