@@ -67,7 +67,8 @@ enemy1.x = 2
 enemy1.y = 2
 enemies.append(enemy1)
 lvl1map = [["." for i in range(8)]for i in range(8)] #level 1 map
-reg_map = [["." for i in range(8)]for i in range(8)] #regular map
+reg_map = [] #regular map
+stat_map = copy.deepcopy(reg_map) #static map - never changes
 chapter = 1 #chapter we're on
 turn = 1
 franny = Cavalier("Franny",22,6,7,6,5,4,3,8,[85,40,55,50,35,35,25])
@@ -77,6 +78,7 @@ franny.wskl["Sword"] = 200
 franny.items.append(iron_lance)
 franny.items.append(iron_sword)
 franny.items.append(vulnerary)
+franny.equip = iron_lance
 franny.sym = "F"
 franny.x = 3
 franny.y = 7
@@ -87,6 +89,7 @@ running = True
 while running:
     if chapter == 1 and turn == 1:
         reg_map = copy.deepcopy(lvl1map)
+        stat_map = copy.deepcopy(lvl1map)
     for a in allies:
         reg_map[len(reg_map)-1-a.y][a.x] = a.sym
     for e in enemies:
@@ -146,10 +149,10 @@ while running:
                         askmsg = "Invalid enemy, input a valid enemy name: " 
                     asking = False
                     break
-            if comm.upper() == "END":
-                turn += 1
-            else:
-                askingmsg = "Not a valid ally. Select an ally to display info:"
+                else:
+                    askingmsg = "Not a valid ally. Select an ally to display info:"
+    if comm.upper() == "END":
+        turn += 1 #add enemy's turn here
     elif comm.upper() == "DISPLAY":
         #print enemy or ally info. So far only allies done
         asking = True
@@ -237,18 +240,45 @@ while running:
                 asking = False
                 break
             for a in allies:
-                if (ally == "me" and a == player) or ally == a.name.lower():
+                if (ally.lower() == "me" and a == player) or ally.lower() == a.name.lower():
                     flying = True if a.CLASS in ["Pegasus Knight","Wyvern Rider","Wyvern Lord","Falcoknight"] else False
                     waterproof = True if a.CLASS in ["Pirate","Berserker"] else False
                     move_map = moveDisp(a.x,a.y,a.MOVE+1,a.MOVE+1,reg_map,flying,waterproof)
-                    showMap(move_map)
-                    askmsg2 = "Where do you move your:"
+                    showMap(move_map) 
+                    while True:
+                        xmove = 0#where user wants to move unit
+                        ymove = 0
+                        try:
+                            xmove = int(input("What's the X co-ord of where you move?\n"))
+                            ymove = int(input("What's the Y co-ord of where you move?\n"))
+                        except Exception:
+                            print("You must enter an integer!")
+                            continue
+                        if xmove >= len(reg_map[0]):
+                            print("X value too large!")
+                        elif xmove < 0:
+                            print("X value too small!")
+                        elif len(reg_map)-ymove-1 >= len(reg_map):
+                            print("Y value too large!")
+                        elif len(reg_map)-ymove-1 < 0:
+                            print("Y value too small!")
+                        elif not reg_map[len(reg_map)-ymove-1][xmove] in [str(i) for i in range(1,10)]:
+                            print("Not a moveable square!")
+                        else:
+                            reg_map[len(reg_map)-a.y-1][a.x] = stat_map[len(reg_map)-a.y-1][a.x] #removes ally symbol from place moved from and reverts to normal as found on static map
+                            a.x = xmove
+                            a.y = ymove
+                            reg_map[len(reg_map)-ymove-1][xmove] = a.sym
+                            print("Moved",a.name,"to (",xmove,",",ymove,")")
+                            asking = False
+                            break
     elif comm.upper() == "HELP":
         print("""QUIT - leave the game (why would u do that?)
 DISPLAY - display an units name
 CALCULATE - calculate an ally against an enemy
 MAP - Display map
 MOVE (INC) - Move an ally
-ATTACK (Movement date INC) - What do you think it does? Heal?""")
+ATTACK (Movement date INC) - What do you think it does? Heal?
+END - Ends your turn, and then enemies can attack you. Be careful when you do this man.""")
     else:
         print("Invalid command")

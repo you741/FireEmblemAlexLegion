@@ -20,7 +20,7 @@ class Item():
             return False
     def display(self):
         if not self.desc == "":
-            print(desc)
+            print(self.desc)
 class Weapon(Item):
     def __init__(self,name,mt,wt,dur,acc,typ,mast,crit=0,rnge=1,mag=False,sup_eff="",maxrnge=1,wexp=3,desc=""):
         super(Weapon,self).__init__(name,dur,desc)
