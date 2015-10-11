@@ -16,11 +16,13 @@ askingclass = True
 askmsg = "Enter your class (mage,knight,myrmidon) or info for more info:\n"
 #^msg asked to user in askingclass loop
 
-#----common weapons----#
+#----common weapons and items----#
 iron_lance = Weapon("Iron Lance",7,8,45,80,"Lance",100)
 fire = Weapon("Fire",5,4,40,95,"Anima",100,0,1,True,"",2)
-slim_sword = Weapon("Slim Sword",4,2,35,100,"Sword",200,5,1)
+slim_sword = Weapon("Slim Sword",3,2,35,100,"Sword",200,5)
+iron_sword = Weapon("Iron Sword",5,5,47,90,"Sword",100)
 iron_axe = Weapon("Iron Axe",8,10,45,75,"Axe",100)
+vulnerary = Item("Vulnerary",3,"Heals for 10 HP")
 
 #asking user for class
 while askingclass:
@@ -69,8 +71,17 @@ reg_map = [["." for i in range(8)]for i in range(8)] #regular map
 chapter = 1 #chapter we're on
 turn = 1
 franny = Cavalier("Franny",22,6,7,6,5,4,3,8,[85,40,55,50,35,35,25])
+franny.level = 3
 franny.wskl["Lance"] = 200
 franny.wskl["Sword"] = 200
+franny.items.append(iron_lance)
+franny.items.append(iron_sword)
+franny.items.append(vulnerary)
+franny.sym = "F"
+franny.x = 3
+franny.y = 7
+allies.append(franny)
+
 running = True
 #main game loop
 while running:
@@ -110,7 +121,7 @@ while running:
                     askmsg = "Pick enemy to attack: "
                     while asking:
                         enemy = input(askmsg)
-                        if enemy == "cancel":
+                        if enemy.lower() == "cancel":
                             asking = False
                             print("Attack with",a.name,"cancelled")
                             break
@@ -154,6 +165,10 @@ while running:
                 print(e.name)
             print("===============================")
             unit = input()
+            if unit.lower() == "cancel":
+                print("Display function cancelled")
+                asking = False
+                break
             for u in allies+enemies:
                 if unit.upper() == u.name.upper():
                     #action that takes place
@@ -165,13 +180,7 @@ while running:
                 askingmsg = "Not a valid ally. Select an ally to display info:"
     elif comm.upper() == "MAP":
         #print map
-        print("  "+" ".join([str(i) for i in range(len(reg_map[0]))]))
-        for y in range(len(reg_map)):
-            horbar = "" #horizontal bar
-            for x in reg_map[y]:
-                horbar += " "+x
-            ydisp = len(reg_map) - y - 1 #y as displayed on grid
-            print(ydisp,horbar,sep="")
+        showMap(reg_map)
     elif comm.upper() in ["CALC","CALCULATE"]:
         asking = True
         askingmsg = "Select an ally to calculate with: "
@@ -198,7 +207,7 @@ while running:
                     askmsg = "Pick enemy to calculate against: "
                     while asking:
                         enemy = input(askmsg)
-                        if enemy == "cancel":
+                        if enemy.lower() == "cancel":
                             asking = False
                             print("Calculation with",a.name,"cancelled")
                             break
@@ -216,13 +225,30 @@ while running:
                 askingmsg = "Not a valid ally. Select an ally to display info:"
     elif comm.upper() == "MOVE":
         asking = True
-        askmsg = "Pick ally to move"
+        askmsg = "Pick ally to move: "
         while asking:
             print("===============================")
             for a in allies:
                 print(a.name)
-            
             print("===============================")
             ally = input(askmsg) #ally selected by user
+            if ally == "cancel":
+                print("Ally movement cancelled")
+                asking = False
+                break
+            for a in allies:
+                if (ally == "me" and a == player) or ally == a.name.lower():
+                    flying = True if a.CLASS in ["Pegasus Knight","Wyvern Rider","Wyvern Lord","Falcoknight"] else False
+                    waterproof = True if a.CLASS in ["Pirate","Berserker"] else False
+                    move_map = moveDisp(a.x,a.y,a.MOVE+1,a.MOVE+1,reg_map,flying,waterproof)
+                    showMap(move_map)
+                    askmsg2 = "Where do you move your:"
+    elif comm.upper() == "HELP":
+        print("""QUIT - leave the game (why would u do that?)
+DISPLAY - display an units name
+CALCULATE - calculate an ally against an enemy
+MAP - Display map
+MOVE (INC) - Move an ally
+ATTACK (Movement date INC) - What do you think it does? Heal?""")
     else:
         print("Invalid command")

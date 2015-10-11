@@ -145,8 +145,13 @@ class Person:
             promoted.wskl = self.wskl
         return promoted
     def add_item(self,item):
-        pass
-    #finish this function later You Zhou
+        if len(self.items) >= 5:
+            print(self.name,'has a full inventory')
+            return 0
+        else:
+            print(self.name,"added",item.name,"to inventory")
+            self.items.append(item)
+            return 1 
     
 #Murderer Class is basis for all fighting classes
 class Murderer(Person):
@@ -208,16 +213,38 @@ class Murderer(Person):
                 print(enemy.name,"died") #if enemy dies it will print
                 expgain += enemy.gift - self.level #adds more exp when en dies
             self.gainExp(expgain)
+            if self.equip.use():
+                self.items.remove(self.equip)
+                eq_newItem = False
+                for i in items:
+                    if type(i) == Weapon:
+                        if self.equip_w(i,False):
+                            #tries to equip every item in list.
+                            #won't print error
+                            eq_newItem = True
+                            break
+                if not eq_newItem:
+                    self.equip_w(Weapon("No weapon",0,0,0,0,"",0))
             return 1
         else:
             print(self.name,"attacked",enemy.name,"but",enemy.name,"dodged")
             return 0
-    def equip_w(self,weapon):
+    def equip_w(self,weapon,err=True):
         #equips weapon
+        if self.items.index(weapon) == -1:
+            print("Unit does not have this weapon!")
+            return 0
+        if self.equip.name.lower() != "no weapon" and self.wskl[weapon.typ] >= weapon.mast:
+            e_index = self.items.index(self.equip)
+            w_index = self.items.index(weapon)
+            self.items[e_index],self.items[w_index] = weapon,self.equip
         if self.wskl[weapon.typ] >= weapon.mast:
+            print(self.name,"equipped",weapon.name)
             self.equip = weapon
             return 1
         else:
+            if not err:
+                print(self.name,"has not enough",weapon.typ,"mastery level to use",weapon.name)
             return 0
 #-----------MAGE-------------#
 class Mage(Murderer):

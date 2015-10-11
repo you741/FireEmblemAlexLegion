@@ -7,14 +7,14 @@ from pprint import pprint
 #===============================================================#
 #map legend:                                                    #
 # + = attackable/healable square with current weapon/staff      #
-# 1-9 = Moveable square                                         #
+# 1-9 and # = Moveable square                                         #
 # . = field | = forest                                          #
 # e = Enemy E = enemy you can attack                            #
 # b = Boss B = boss you can attack                              #
 # = = wall - = water * = fog                                    #
 # Any other character is a playable unit                        #
 #===============================================================#
-movemap = []
+
 def moveDisp(x,y,move,maxmove,grid,flying=False,waterproof=False):
     #displays movement for specific units
     ym = len(grid) - 1 - y #y position on map
@@ -62,8 +62,15 @@ def moveDisp(x,y,move,maxmove,grid,flying=False,waterproof=False):
         return grid
     else:
         return grid
-def getMoveMap():
-    global movemap
-    return movemap
+def showMap(grid):
+    print("  "+" ".join([str(i) for i in range(len(grid[0]))]))
+    for y in range(len(grid)):
+        horbar = "" #horizontal bar
+        for x in grid[y]:
+            x_fin = x if not x in [str(i) for i in range(1,10)] else "#"
+            horbar += " "+x_fin
+        ydisp = len(grid) - y - 1 #y as displayed on grid
+        print(ydisp,horbar,sep="")
+    return True
     
 
