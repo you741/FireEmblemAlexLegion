@@ -58,6 +58,7 @@ class Person:
         self.caps = [40,20,20,20,20,20,20]
         self.sym = "人" #symbol as appeared on map
         self.attackspeed = spd #attack speed
+        self.canAttack = False
     def losehp(self,damage):
         damage_t = damage
         if damage_t < 0:
@@ -88,6 +89,7 @@ class Person:
         print("Resistance:",self.resistance)
         print("Constitution:",self.constitution)
         print("Equipped weapon:",self.equip.name)
+        print("Experience:",self.exp,"/100")
         rankL = ["F","E","D","C","B","A","S"]
         for k,t in enumerate(self.wskl):
             if self.wskl[t] >= 100:
@@ -169,6 +171,7 @@ class Murderer(Person):
     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
         super(Murderer,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Murderer"
+        self.canAttack = True
     def calculate(self,enemy,terr=0):
         if not self.alive:
             return False
@@ -188,11 +191,13 @@ class Murderer(Person):
                     break
         print(self.name)
         print("HP:",self.hp,"/",self.maxhp)
-        print("Hit:",self.dexterity*2 + self.equip.acc + self.luck//2 + mod + terr - enemy.speed*2 - enemy.luck)
+        print("Hit:",self.dexterity*2 + self.equip.acc + self.luck//2 + mod + terr - enemy.attackspeed*2 - enemy.luck)
         spdam = "x2" if self.speed - 4 >= enemy.speed else ""
         print("Dam:",self.equip.damage(self,enemy)+exdam,spdam)
         print("Crit:",self.dexterity//2 - enemy.luck + self.equip.crit)
     def attack(self,enemy,terr=0):
+        if not self.canAttack:
+            return False
         if not self.alive:
             return False
         global weaponTriangle
@@ -210,7 +215,7 @@ class Murderer(Person):
                     exdam = -1
                     break
         #calculates if enemy was hit   
-        if self.dexterity*2 + self.luck//2 + self.equip.acc - enemy.speed*2 - enemy.luck + terr + mod > randint(0,99):
+        if self.dexterity*2 + self.luck//2 + self.equip.acc - enemy.attackspeed*2 - enemy.luck + terr + mod > randint(0,99):
             damage = self.equip.damage(self,enemy)+exdam #damage done to enemy
             expgain = damage-self.level #increasing exp
             if expgain > 20:
@@ -238,10 +243,11 @@ class Murderer(Person):
                 if not eq_newItem:
                     self.items.remove(self.equip)
                     self.equip = Weapon("No weapon",0,0,0,0,"",0)
+                    self.canAttack = False
             return 1
         else:
             print(self.name,"attacked",enemy.name,"but",enemy.name,"dodged")
-            return 0
+            return 2
     def equip_w(self,weapon,err=True):
         #equips weapon
         if not weapon in self.items:
@@ -253,12 +259,15 @@ class Murderer(Person):
             w_index = self.items.index(weapon)
             self.items[e_index],self.items[w_index] = weapon,self.equip
         if self.wskl[weapon.typ] >= weapon.mast:
-            print(self.name,"equipped",weapon.name)
+            if err:
+                print(self.name,"equipped",weapon.name)
             self.equip = weapon
-            
+            self.canAttack = True
             #changes attackspeed based on weapon
             if self.equip.wt > self.constitution:
                 self.attackspeed = self.speed - self.equip.wt + self.constitution
+                if self.attackspeed < 0:
+                    self.attackspeed = 0
             else:
                 self.attackspeed = self.speed
             return 1
@@ -270,6 +279,8 @@ class Murderer(Person):
         if (self.wskl[typ]+wexp_g)//100 > self.wskl[typ]//100:
             print(typ,"mastery level increased")
         self.wskl[typ] += wexp_g
+        if self.wskl[typ] > 600:
+            self.wskl[typ] = 600
 #-----------MAGE-------------#
 class Mage(Murderer):
     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):

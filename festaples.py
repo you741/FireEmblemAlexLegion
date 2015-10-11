@@ -77,5 +77,31 @@ def showMap(grid):
         up_bar += spc + str(i)
     print(up_bar)
     return True
+def askUser(ques,li,player,obj="units",enemy=False):
+    print("==========",obj.upper(),"==========",sep="=")
+    if not enemy:
+        print(player.name,"(enter 'me' not this name)")
+    for u in li:
+        print(u.name)
+    print("==========","="*len(obj),"==========",sep="=")
+    asking = True
+    while asking:
+        unit = input(ques)
+        if unit.lower() == "cancel":
+            print("Cancelled")
+            return "cancel"
+            asking = False
+            break
+        if unit.lower() == "me" and not enemy:
+            return player
+            asking = False
+            break
+        for u in li:
+            if unit.lower() == u.name.lower():
+                return u
+                asking = False
+                break
+        else:
+            print("Invalid",obj)
     
 
