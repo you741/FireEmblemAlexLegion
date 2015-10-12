@@ -141,7 +141,7 @@ while running:
         showMap(reg_map)
         print("====LEGEND====")
         for u in allies+enemies:
-            print(u.sym,"=",u.name,end=" ")
+            print(u.sym,"=",u.name,end=" | ")
         print("\n")
     elif comm.upper() in ["CALC","CALCULATE"]:
         #calculates damage between 2 units (ally and enemy)
@@ -167,7 +167,7 @@ while running:
             waterproof = True if a.CLASS in ["Pirate","Berserker"] else False
             move_map = moveDisp(a.x,a.y,a.MOVE+1,a.MOVE+1,reg_map,flying,waterproof)
             showMap(move_map)
-            print("====LEGEND====")
+            print("======LEGEND======")
             for u in allies+enemies:
                 print(u.sym,"=",u.name,end=" ")
             print("\n")
@@ -200,13 +200,24 @@ while running:
                     print("Moved",a.name,"to (",xmove,",",ymove,")")
                     break
     elif comm.upper() == "ITEM":
-        a = askUser("Pick ally to view items of: ",allies[1:],player,"ally")
+        a = askUser("Pick ally to view items of: ",allies[1:],player,"allies")
         userwants = True #does user want to continue with action
         if a == "cancel":
             userwants = False
         if userwants:
             print(a.name+"'s items")
             a.show_items()
+    elif comm.upper() == "EQUIP":
+        a = askUser("Pick ally to equip a weapon to: ",allies[1:],player,"allies")
+        userwants = True
+        if a == "cancel":
+            userwants = False
+        if userwants:
+            print(a.name+"'s items")
+            a.show_items()
+            eq = askUser("Pick weapon to equip to: ",a.items,player,"items",True)
+            if not eq == "cancel":
+                a.equip_w(eq)
     elif comm.upper() == "HELP":
         print("""QUIT - leave the game (why would u do that?)
 DISPLAY - display an units name

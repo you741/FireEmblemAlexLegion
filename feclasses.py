@@ -250,6 +250,10 @@ class Murderer(Person):
             return 2
     def equip_w(self,weapon,err=True):
         #equips weapon
+        if not type(weapon) == Weapon:
+            if err:
+               print("Not a weapon! Can't equip!") 
+            return 0
         if not weapon in self.items:
             if err:
                 print("Unit does not have this weapon!")
