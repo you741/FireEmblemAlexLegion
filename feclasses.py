@@ -59,6 +59,7 @@ class Person:
         self.sym = "人" #symbol as appeared on map
         self.attackspeed = spd #attack speed
         self.canAttack = False
+        self.canMove = True
     def losehp(self,damage):
         damage_t = damage
         if damage_t < 0:
@@ -73,9 +74,9 @@ class Person:
         return damage_t
     def gainhp(self,hp):
         self.hp += hp
-        print(self.name,"healed by",hp,"up to",self.hp)
         if self.hp > self.maxhp:
             self.hp = self.maxhp
+        print(self.name,"healed by",hp,"up to",self.hp)
     def display(self):
         print("Name:",self.name)
         print("Class:",self.CLASS)
@@ -193,7 +194,7 @@ class Murderer(Person):
         print("HP:",self.hp,"/",self.maxhp)
         print("Hit:",self.dexterity*2 + self.equip.acc + self.luck//2 + mod + terr - enemy.attackspeed*2 - enemy.luck)
         spdam = "x2" if self.speed - 4 >= enemy.speed else ""
-        print("Dam:",self.equip.damage(self,enemy)+exdam,spdam)
+        print("Dam:",self.equip.damage(self,enemy,True)+exdam,spdam)
         print("Crit:",self.dexterity//2 - enemy.luck + self.equip.crit)
     def attack(self,enemy,terr=0):
         if not self.canAttack:
@@ -258,11 +259,12 @@ class Murderer(Person):
             if err:
                 print("Unit does not have this weapon!")
             return 0
-        if not self.equip.name.lower() == "no weapon" and self.wskl[weapon.typ] >= weapon.mast:
+        no_weapon = self.equip.name.lower() == "no weapon"
+        if (not no_weapon and self.wskl[weapon.typ] >= weapon.mast) or (not no_weapon and self.name == weapon.prf):
             e_index = self.items.index(self.equip)
             w_index = self.items.index(weapon)
             self.items[e_index],self.items[w_index] = weapon,self.equip
-        if self.wskl[weapon.typ] >= weapon.mast:
+        if self.wskl[weapon.typ] >= weapon.mast or self.name == weapon.prf:
             if err:
                 print(self.name,"equipped",weapon.name)
             self.equip = weapon
@@ -285,6 +287,12 @@ class Murderer(Person):
         self.wskl[typ] += wexp_g
         if self.wskl[typ] > 600:
             self.wskl[typ] = 600
+#-----------LORD-------------#
+class Lord(Murderer):
+    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
+        super(Lord,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
+        self.CLASS = "Lord"
+        self.promoteC = "Nerd Lord"
 #-----------MAGE-------------#
 class Mage(Murderer):
     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
