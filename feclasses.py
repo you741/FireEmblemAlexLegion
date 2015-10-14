@@ -60,6 +60,10 @@ class Person:
         self.attackspeed = spd #attack speed
         self.canAttack = False
         self.canMove = True
+        self.flying = False
+        self.mountainous = False
+        self.waterproof = False
+        self.magical = False
     def losehp(self,damage):
         damage_t = damage
         if damage_t < 0:
@@ -90,6 +94,10 @@ class Person:
         print("Resistance:",self.resistance)
         print("Constitution:",self.constitution)
         print("Equipped weapon:",self.equip.name)
+        extrng = ""
+        if not self.equip.rnge == self.equip.maxrnge:
+            extrng = "- "+str(self.equip.maxrnge)
+        print("Range:",self.equip.rnge,extrng)
         print("Experience:",self.exp,"/100")
         rankL = ["F","E","D","C","B","A","S"]
         for k,t in enumerate(self.wskl):
@@ -166,6 +174,11 @@ class Person:
             else:
                 print(i.name)
             print("----------------------")
+    def move(self,x,y):
+        self.x = x
+        self.y = y
+        print("Moved ",self.name," to (",x,",",y,")",sep = "")
+        return True
     
 #Murderer Class is basis for all fighting classes
 class Murderer(Person):
@@ -173,7 +186,8 @@ class Murderer(Person):
         super(Murderer,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Murderer"
         self.canAttack = True
-    def calculate(self,enemy,terr=0):
+        self.caps = [40,20,20,20,30,20,20]
+    def calculate(self,enemy,terr=0,terr_def=0,unreal=True):
         if not self.alive:
             return False
         global weaponTriangle
@@ -190,16 +204,34 @@ class Murderer(Person):
                     mod = -20
                     exdam = -1
                     break
+        hit = self.dexterity*2 + self.equip.acc + self.luck//2 + mod - terr - enemy.attackspeed*2 - enemy.luck
+        dam = self.equip.damage(self,enemy,True)+exdam-terr_def
+        spdam = "x 2" if self.speed - 4 >= enemy.speed else ""
+        crit = self.dexterity//2 - enemy.luck + self.equip.crit
+        distx = abs(self.x - enemy.x)
+        disty = abs(self.y - enemy.y)
+        dist = distx + disty #enemy distance
+        if not self.equip.rnge <= dist <= self.equip.maxrnge and not unreal:
+            hit = "--"
+            dam = "--"
+            crit = "--"
+            #displays no values if not in range
         print(self.name)
         print("HP:",self.hp,"/",self.maxhp)
-        print("Hit:",self.dexterity*2 + self.equip.acc + self.luck//2 + mod + terr - enemy.attackspeed*2 - enemy.luck)
-        spdam = "x2" if self.speed - 4 >= enemy.speed else ""
-        print("Dam:",self.equip.damage(self,enemy,True)+exdam,spdam)
-        print("Crit:",self.dexterity//2 - enemy.luck + self.equip.crit)
-    def attack(self,enemy,terr=0):
+        print("Hit:",hit)
+        print("Dam:",dam,spdam)
+        print("Crit:",crit)
+    def attack(self,enemy,terr=0,terr_def=0):
         if not self.canAttack:
             return False
         if not self.alive:
+            return False
+        distx = abs(enemy.x - self.x)
+        disty = abs(enemy.y - self.y)
+        dist = distx + disty
+        #distance of enemy to ally
+        if not self.equip.rnge <= dist <= self.equip.maxrnge:
+            #will not attack if not in range
             return False
         global weaponTriangle
         mod = 0
@@ -217,10 +249,12 @@ class Murderer(Person):
                     break
         #calculates if enemy was hit   
         if self.dexterity*2 + self.luck//2 + self.equip.acc - enemy.attackspeed*2 - enemy.luck + terr + mod > randint(0,99):
-            damage = self.equip.damage(self,enemy)+exdam #damage done to enemy
+            self.strength += exdam - terr_def
+            damage = self.equip.damage(self,enemy) #damage done to enemy
+            self.strength -= exdam - terr_def
             expgain = damage-self.level #increasing exp
-            if expgain > 20:
-                expgain = 20 #caps exp gain at 20
+            if expgain > 30:
+                expgain = 20 #caps exp gain at 30
             elif expgain <= 0:
                 expgain = 1 #caps exp gain at 1
             print(self.name,"attacked",enemy.name,"for",damage,"damage") #prints damage
@@ -293,18 +327,24 @@ class Lord(Murderer):
         super(Lord,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Lord"
         self.promoteC = "Nerd Lord"
+        self.magical = True
+        self.wskl["Sword"] = 200
+        self.wskl["Anima"] = 100
 #-----------MAGE-------------#
 class Mage(Murderer):
     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
         super(Mage,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Mage"
         self.promoteC = "Sage"
+        self.magical = True
+        self.wskl["Anima"] = 200
 #----------KNIGHT------------#
 class Knight(Murderer):
     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
         super(Knight,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Knight"
         self.promoteC = "General"
+        self.wskl["Lance"] = 200
         self.MOVE = 4
 #---------MYRMIDON-----------#
 class Myrmidon(Murderer):
@@ -312,6 +352,7 @@ class Myrmidon(Murderer):
         super(Myrmidon,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
         self.CLASS = "Myrmidon"
         self.promoteC = "Swordmaster"
+        self.wskl["Sword"] = 200
 #---------CAVALIER-----------#
 class Cavalier(Murderer):
     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
@@ -320,3 +361,12 @@ class Cavalier(Murderer):
         self.mounted = True
         self.promoteC = "Paladin"
         self.MOVE = 7
+        self.wskl["Lance"] = 200
+        self.wskl["Sword"] = 100
+#-----------BRIGAND----------#
+class Brigand(Murderer):
+     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,growths=[50,50,50,50,50,50,50]):
+        super(Brigand,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,growths)
+        self.CLASS = "Brigand"
+        self.mountainous = True
+        self.wskl["Axe"] = 200

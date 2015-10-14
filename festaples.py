@@ -8,60 +8,49 @@ from pprint import pprint
 #map legend:                                                    #
 # + = attackable/healable square with current weapon/staff      #
 # 1-9 and # = Moveable square                                   #
-# . = field | = forest                                          #
+# . = field | = forest ^ = hill 山 = mountain                   #
 # e = Enemy E = enemy you can attack                            #
 # b = Boss B = boss you can attack                              #
 # = = wall - = water * = fog                                    #
 # Any other character is a playable unit                        #
 #===============================================================#
 
-def moveDisp(x,y,move,maxmove,grid,enemies,flying=False,waterproof=False):
+def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
+    #INC. ADD TERRAIN HANDLEMENT. NEW PARAM NEEDED (all_terr)
     #displays movement for specific units
     ym = len(grid) - 1 - y #y position on map
     curr_spot = grid[ym][x] #current spot on map
     if move <= 0:
-        return grid
-    elif curr_spot in enemies:
+        return grid                #special terrain handling
+    elif curr_spot in enemies or (ally.mounted and curr_spot == "^") or (not ally.flying and curr_spot in ["^","-","=","山"]) or (not ally.waterproof and curr_spot == "-") or (not ally.mountainous and curr_spot == "山"):
         #checks if space modified is occupied or insurpassable
-        return grid
-    elif curr_spot == "." or (flying and curr_spot in ["=","-"]) or (waterproof and curr_spot == "-"):
-        #recursive function - passable and standable
+        return grid                 
+    elif curr_spot in [".","|","^","-","山"]:
+    #recursive function - passable and standable
         grid[ym][x] = str(maxmove-move+1)
-        if not ym-1 < 0:
-            grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,flying,waterproof)
-        if not ym+1 >= len(grid):
-            grid = moveDisp(x,y-1,move-1,maxmove,grid,enemies,flying,waterproof)
-        if not x-1 < 0:
-            grid = moveDisp(x-1,y,move-1,maxmove,grid,enemies,flying,waterproof)
-        if not x+1 >= len(grid[0]):
-            grid = moveDisp(x+1,y,move-1,maxmove,grid,enemies,flying,waterproof)
-        return grid
     elif curr_spot in [str(i) for i in range(1,10)]:
         #marked square, will replace if smaller
         if int(curr_spot) > maxmove-move+1:
             grid[ym][x] = str(maxmove-move+1)
-        if not ym-1 < 0:
-            grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,flying,waterproof)
-        if not ym+1 >= len(grid):
-            grid = moveDisp(x,y-1,move-1,maxmove,grid,enemies,flying,waterproof)
-        if not x-1 < 0:
-            grid = moveDisp(x-1,y,move-1,maxmove,grid,enemies,flying,waterproof)
-        if not x+1 >= len(grid[0]):
-            grid = moveDisp(x+1,y,move-1,maxmove,grid,enemies,flying,waterproof)
-        return grid
     elif not move == 1:
-        #recursive function - passable but not standable
-        if not ym-1 < 0:
-            grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,flying,waterproof)
-        if not ym+1 >= len(grid):
-            grid = moveDisp(x,y-1,move-1,maxmove,grid,enemies,flying,waterproof)
-        if not x-1 < 0:
-            grid = moveDisp(x-1,y,move-1,maxmove,grid,enemies,flying,waterproof)
-        if not x+1 >= len(grid[0]):
-            grid = moveDisp(x+1,y,move-1,maxmove,grid,enemies,flying,waterproof)
-        return grid
+        pass
     else:
         return grid
+    for t in all_terr:
+        if curr_spot == t.sym:
+            if move-t.hind > 0 and not ally.flying:
+                move -= t.hind
+                break#reduces movement by hindrance
+    if not ym-1 < 0:
+            grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,ally,all_terr)
+    if not ym+1 >= len(grid):
+        grid = moveDisp(x,y-1,move-1,maxmove,grid,enemies,ally,all_terr)
+    if not x-1 < 0:
+        grid = moveDisp(x-1,y,move-1,maxmove,grid,enemies,ally,all_terr)
+    if not x+1 >= len(grid[0]):
+        grid = moveDisp(x+1,y,move-1,maxmove,grid,enemies,ally,all_terr)
+    return grid
+
 def showMap(grid):
     for y in range(len(grid)):
         horbar = "" #horizontal bar
@@ -78,7 +67,7 @@ def showMap(grid):
     print(up_bar)
     return True
 #loop to ask user things
-def askUser(ques,li,player,obj="units",displayer=False,attr=""):
+def askUser(ques,li,player,obj="units",nodisplayer=False,attr=""):
     print("==========",obj.upper(),"==========",sep="=")
     for u in li:
         isplayer = "(enter 'me', not this name)" if u == player else ""
@@ -96,7 +85,7 @@ def askUser(ques,li,player,obj="units",displayer=False,attr=""):
             return "cancel"
             asking = False
             break
-        if unit.lower() == "me" and not displayer:
+        if unit.lower() == "me" and not nodisplayer:
             return player
             asking = False
             break
@@ -108,4 +97,19 @@ def askUser(ques,li,player,obj="units",displayer=False,attr=""):
         else:
             print("Invalid",obj)
     
-
+#uses an item
+def use(item,unit):
+    if item.name == "Vulnerary":
+        unit.gainhp(10)
+        item.use()
+        print(unit.name,"healed to",unit.hp,"with Vulnerary")
+        return True
+    elif item.name == "Elixir":
+        unit.hp = unit.maxhp
+        item.use()
+        print(unit.name,"healed to",unit.hp,"with Elixir")
+        return True
+    else:
+        #invalid item for usage
+        print("Can't use item!")
+        return False
