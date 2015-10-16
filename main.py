@@ -8,6 +8,7 @@ from feclasses import *
 from feweapons import *
 from festory import *
 import copy
+import time
 allies = []
 enemies = []
 name = input("Enter your name:\n")
@@ -33,19 +34,13 @@ forest = Terrain("Forest","|",20,1,1)
 while askingclass:
     playerclass = input(askmsg)
     if playerclass.lower() == "mage":
-        player = Mage(name,18,5,6,6,6,2,5,4,[60,40,60,55,50,20,50])
-        player.add_item(copy.deepcopy(fire),False)
-        player.wskl["Anima"] = 200
+        player = Mage(name,18,5,6,6,6,2,5,4,[copy.deepcopy(fire)],[60,40,60,55,50,20,50])
         askingclass = False
     if playerclass.lower() == "knight":
-        player = Knight(name,21,7,4,4,3,6,1,10,[80,55,45,35,40,55,20])
-        player.add_item(copy.deepcopy(iron_lance),False)
-        player.wskl["Lance"] = 200
+        player = Knight(name,21,7,4,4,3,6,1,10,[copy.deepcopy(iron_lance)],[80,55,45,35,40,55,20])
         askingclass = False
     if playerclass.lower() == "myrmidon":
-        player = Myrmidon(name,20,5,6,7,4,4,2,5,[70,40,60,60,45,25,30])
-        player.add_item(copy.deepcopy(slim_sword),False)
-        player.wskl["Sword"] = 200
+        player = Myrmidon(name,20,5,6,7,4,4,2,5,[copy.deepcopy(slim_sword)],[70,40,60,60,45,25,30])
         askingclass = False
     if playerclass.lower() == "info":
         print("""Mage - A speedy and accurate user of anima magic. Can't really take physical hits, although magical defense is high. Melts enemies with low resistance.
@@ -54,7 +49,7 @@ Myrmidon - A speedy sword user. Very skillfull with the sword art, but dies easi
         askmsg = "Enter your class (mage,knight,myrmidon) or info for more info:\n"      
     else:
         askmsg = "Your entry is invalid. Please enter mage, knight, myrmidon or info:\n"
-player.equip_w(player.items[0],False)
+
 player.sym = "P"
 player.x = 3
 player.y = 2
@@ -68,27 +63,15 @@ stat_map = copy.deepcopy(reg_map) #static map - never changes
 chapter = 0 #chapter we're on
 turn = 1
 #creating franny
-franny = Cavalier("Franny",22,6,8,7,5,5,3,8,[85,45,55,55,40,35,25])
+franny = Cavalier("Franny",22,6,8,7,5,5,3,8,[copy.deepcopy(iron_lance),copy.deepcopy(iron_sword),copy.deepcopy(vulnerary)],[85,45,55,55,40,35,25])
 franny.level = 3
-franny.wskl["Lance"] = 200
-franny.wskl["Sword"] = 200
-franny.add_item(copy.deepcopy(iron_lance),False)
-franny.add_item(copy.deepcopy(iron_sword),False)
-franny.add_item(copy.deepcopy(vulnerary),False)
-franny.equip_w(franny.items[0],False)
 franny.sym = "F"
 franny.x = 3
 franny.y = 7
 #allies.append(franny)
 #creating You Zhou
-yoyo = Lord("Yoyo",18,5,7,5,7,2,4,5,[60,40,65,40,70,20,45])
-yoyo.add_item(copy.deepcopy(rapier),False)
-yoyo.wskl["Sword"] = 200
-yoyo.wskl["Anima"] = 100
-yoyo.equip_w(yoyo.items[0],False)
-yoyo.add_item(copy.deepcopy(fire),False)
+yoyo = Lord("Yoyo",18,5,7,5,7,2,4,5,[copy.deepcopy(rapier),copy.deepcopy(fire),copy.deepcopy(vulnerary)],[60,40,65,40,70,20,45])
 yoyo.sym = "Y"
-yoyo.add_item(copy.deepcopy(vulnerary),False)
 yoyo.x = 3
 yoyo.y = 3
 allies.append(yoyo)
@@ -109,15 +92,35 @@ while running:
         #all terrain list
         all_terr = copy.deepcopy(lvl1_elem)
         #creating enemy1
-        enemy1 = Brigand("Bandit 1",20,6,2,2,0,3,0,8)
+        enemy1 = Brigand("Bandit 1",20,6,2,2,0,3,0,8,[copy.deepcopy(iron_axe)])
         enemy1.canLevel = False
-        enemy1.gift = 40
-        enemy1.add_item(copy.deepcopy(iron_axe),False)
-        enemy1.equip_w(enemy1.items[0],False)
+        enemy1.gift = 50
         enemy1.sym = "E"
         enemy1.x = 2
         enemy1.y = 2
         enemies.append(enemy1)
+        #creating enemies 2 and 3
+        enemy2 = copy.deepcopy(enemy1)
+        enemy2.name = "Bandit 2"
+        enemy2.x = 1
+        enemy2.y = 5
+        enemy2.sym = "€"
+        enemy3 = copy.deepcopy(enemy1)
+        enemy3.name = "Bandit 3"
+        enemy3.x = 3
+        enemy3.y = 7
+        enemy3.sym = "ε"
+        enemies.append(enemy2)
+        enemies.append(enemy3)
+        #creates boss
+        boss = Brigand("Bandit 1",28,8,4,4,0,5,1,8,[copy.deepcopy(iron_axe)])
+        boss.name = "Alex the Bandit"
+        boss.canLevel = False
+        boss.sym = "B"
+        boss.gift = 80
+        boss.x = 12
+        boss.y = 10
+        enemies.append(boss)
         #initializing dynamic map (units) and static map (terrain)
         reg_map = copy.deepcopy(lvl1map)
         stat_map = copy.deepcopy(lvl1map)
@@ -127,11 +130,11 @@ while running:
     for e in enemies:
         reg_map[len(reg_map)-1-e.y][e.x] = e.sym
     comm = input("Enter a command:\n")
-    #--------------QUIT----------------#
+    #----------------------QUIT-----------------------#
     if comm.upper() == "QUIT":
         running = False
         print("You have quit and lost all progress")
-    #--------------ATTACK--------------#
+    #---------------------ATTACK----------------------#
     elif comm.upper() == "ATTACK":
         #attack function
         a = askUser("Select ally to attack with: ",attackers,player,"allies that can attack")
@@ -139,6 +142,15 @@ while running:
         if a == "cancel":
             userwants = False
         if userwants:
+            weapons = [w for w in a.items if type(w) == Weapon] #creates weapons, let's user equip
+            weapon = askUser("Select weapon to attack with: ",weapons,player,"weapons",True)
+            if weapon == "cancel":
+                userwants = False
+            if not weapon:
+                print("This unit has no weapon!")
+                userwants = False
+        if userwants:
+            a.equip_w(weapon)
             attackable = []
             for en in enemies:
                 distx = abs(en.x - a.x)
@@ -150,8 +162,11 @@ while running:
             e = askUser("Select enemy to attack: ",attackable,player,"attackable enemies",True)
             if e == "cancel":
                 userwants = False
+            if not e:
+                userwants = False
+                print("No enemies in range of this unit's weapon! Move closer!")
         if userwants:
-        #ATTACK CODE
+            #ATTACK CODE
             eter_avo = 0 #enemy terrain avoid and defense
             eter_def = 0
             ater_avo = 0 #ally terrain avoid and defense
@@ -183,7 +198,7 @@ while running:
             attackers.remove(a) #makes sure each unit can only attack once per turn
             if a in movers:
                 movers.remove(a)
-    #----------DISPLAY----------#
+    #------------------DISPLAY---------------------#
     elif comm.upper() == "DISPLAY":
         #print enemy or ally info
         a = askUser("Select unit to display info: ",allies+enemies,player)
@@ -192,7 +207,7 @@ while running:
             userwants = False
         if userwants:
             a.display()
-    #-----------MAP-----------#
+    #---------------------MAP----------------------#
     elif comm.upper() == "MAP":
         #print map
         showMap(reg_map)
@@ -200,7 +215,7 @@ while running:
         for u in allies+enemies+all_terr:
             print(u.sym,"=",u.name,end=" | ")
         print("\n")
-    #-----------CALCULATE-------------#
+    #-----------------CALCULATE---------------------#
     elif comm.upper() in ["CALC","CALCULATE"]:
         #calculates damage between 2 units (ally and enemy)
         a = askUser("Select ally to calculate with: ",allies,player,"allies")
@@ -227,12 +242,15 @@ while running:
             a.calculate(e,eter_avo,eter_def)
             print("--------------------------------")
             e.calculate(a,ater_avo,ater_def)
-    #----------------MOVE--------------#
+    #----------------MOVE------------------#
     elif comm.upper() == "MOVE":
         a = askUser("Select ally to move: ",movers,player,"moveable allies")
         userwants = True #does user want to proceed?
         if a == "cancel":
             userwants = False
+        if not a:
+            userwants = False
+            print("No allies that can move!")
         if userwants:
             e_sym = [en.sym for en in enemies]
             move_map = moveDisp(a.x,a.y,a.MOVE+1,a.MOVE+1,copy.deepcopy(reg_map),e_sym,a,all_terr)
@@ -287,7 +305,8 @@ while running:
             userwants = False
         if userwants:
             print(a.name+"'s items")
-            eq = askUser("Pick weapon to equip to: ",a.items,player,"items",True)
+            weapons = [w for w in a.items if type(w) == Weapon]
+            eq = askUser("Pick weapon to equip to: ",weapons,player,"items",True)
             if not eq == "cancel":
                 a.equip_w(eq)
     #------------------HELP------------------#
@@ -330,3 +349,8 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
     #----------------INVALIDE-------------#
     else:
         print("Invalid command. Type HELP for help.")
+    #---------Whether user beats chapter or not--------#
+    if chapter == 0 and len(enemies) == 0:
+        print("You beat the Prologue!")
+        start = True
+        chapter += 1

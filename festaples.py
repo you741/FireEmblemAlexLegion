@@ -16,7 +16,6 @@ from pprint import pprint
 #===============================================================#
 
 def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
-    #INC. ADD TERRAIN HANDLEMENT. NEW PARAM NEEDED (all_terr)
     #displays movement for specific units
     ym = len(grid) - 1 - y #y position on map
     curr_spot = grid[ym][x] #current spot on map
@@ -69,6 +68,9 @@ def showMap(grid):
 #loop to ask user things
 def askUser(ques,li,player,obj="units",nodisplayer=False,attr=""):
     print("==========",obj.upper(),"==========",sep="=")
+    if len(li) < 1:
+        #empty list
+        return False
     for u in li:
         isplayer = "(enter 'me', not this name)" if u == player else ""
         if attr == "display":
@@ -94,6 +96,8 @@ def askUser(ques,li,player,obj="units",nodisplayer=False,attr=""):
                 return u
                 asking = False
                 break
+        if unit.lower() == "info":
+            attr = "display" #displays more info upon user entering info
         else:
             print("Invalid",obj)
     
