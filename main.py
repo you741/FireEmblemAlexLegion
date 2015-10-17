@@ -34,17 +34,19 @@ forest = Terrain("Forest","|",20,1,1)
 while askingclass:
     playerclass = input(askmsg)
     if playerclass.lower() == "mage":
-        player = Mage(name,18,5,6,6,6,2,5,4,[copy.deepcopy(fire)],[60,40,60,55,50,20,50])
+        player = Mage(name,18,5,6,6,6,2,5,4,[copy.deepcopy(fire)],[60,40,50,55,50,10,50])
         askingclass = False
     if playerclass.lower() == "knight":
-        player = Knight(name,21,7,4,4,3,6,1,10,[copy.deepcopy(iron_lance)],[80,55,45,35,40,55,20])
+        player = Knight(name,21,7,4,4,3,6,1,10,[copy.deepcopy(iron_lance)],[80,55,40,30,30,55,15])
         askingclass = False
     if playerclass.lower() == "myrmidon":
-        player = Myrmidon(name,20,5,6,7,4,4,2,5,[copy.deepcopy(slim_sword)],[70,40,60,60,45,25,30])
+        player = Myrmidon(name,20,5,6,7,4,3,2,5,[copy.deepcopy(slim_sword)],[70,40,60,60,45,15,15])
         askingclass = False
     if playerclass.lower() == "info":
         print("""Mage - A speedy and accurate user of anima magic. Can't really take physical hits, although magical defense is high. Melts enemies with low resistance.
+
 Knight - A tanky but slow lance-wielder. Strong but inaccurate. Low resistance.
+
 Myrmidon - A speedy sword user. Very skillfull with the sword art, but dies easily.""")
         askmsg = "Enter your class (mage,knight,myrmidon) or info for more info:\n"      
     else:
@@ -63,14 +65,14 @@ stat_map = copy.deepcopy(reg_map) #static map - never changes
 chapter = 0 #chapter we're on
 turn = 1
 #creating franny
-franny = Cavalier("Franny",22,6,8,7,5,5,3,8,[copy.deepcopy(iron_lance),copy.deepcopy(iron_sword),copy.deepcopy(vulnerary)],[85,45,55,55,40,35,25])
+franny = Cavalier("Franny",22,6,8,7,5,5,3,8,[copy.deepcopy(iron_lance),copy.deepcopy(iron_sword),copy.deepcopy(vulnerary)],[85,35,55,55,40,35,20])
 franny.level = 3
 franny.sym = "F"
 franny.x = 3
 franny.y = 7
 #allies.append(franny)
 #creating You Zhou
-yoyo = Lord("Yoyo",18,5,7,5,7,2,4,5,[copy.deepcopy(rapier),copy.deepcopy(fire),copy.deepcopy(vulnerary)],[60,40,65,40,70,20,45])
+yoyo = Lord("Yoyo",18,5,7,5,7,2,4,5,[copy.deepcopy(rapier),copy.deepcopy(fire),copy.deepcopy(vulnerary)],[60,40,65,40,70,10,45])
 yoyo.sym = "Y"
 yoyo.x = 3
 yoyo.y = 3

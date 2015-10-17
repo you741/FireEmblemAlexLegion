@@ -117,3 +117,27 @@ def use(item,unit):
         #invalid item for usage
         print("Can't use item!")
         return False
+#enemy's AI
+def enemyAI(enemy,allies,movable):
+    for a in allies:
+        weaponTriangle = {"Sword":"Axe",
+                          "Axe":"Lance",
+                          "Lance":"Sword",
+                          "Anima":"Light",
+                          "Light":"Dark",
+                          "Dark":"Anima"}
+        disadv = True
+        adv = False
+        for w in enemy.weapons:
+            if weaponTriangle(w.typ) == a.equip.typ:
+                #if enemy has the advantage
+                disadv = False
+                adv = True
+            if weaponTriangle(a.equip.typ) != w.typ:
+                #if enemy has a weapon that isn't at a disadvantage
+                disadv = False
+        for w in enemy.weapons:
+            for x,y in movable:
+                en = copy.deepcopy(enemy)
+                en_a = en.calculate(a,False,True)
+            
