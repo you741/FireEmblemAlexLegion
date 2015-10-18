@@ -29,18 +29,20 @@ vulnerary = Item("Vulnerary",3,"Heals for 10 HP")
 #--------Common terrain----------#
 plain = Terrain("Plain",".")
 forest = Terrain("Forest","|",20,1,1)
+mountain = Terrain("Mountain","山",40,2,4)
+hill = Terrain("Hill","^",40,2,4)
 #asking user for class
 #creating player's class
 while askingclass:
     playerclass = input(askmsg)
     if playerclass.lower() == "mage":
-        player = Mage(name,18,5,6,6,6,2,5,4,[copy.deepcopy(fire)],[60,40,50,55,50,10,50])
+        player = Mage(name,18,5,6,6,6,2,5,4,[copy.deepcopy(fire)],[60,40,55,55,55,15,50])
         askingclass = False
     if playerclass.lower() == "knight":
-        player = Knight(name,21,7,4,4,3,6,1,10,[copy.deepcopy(iron_lance)],[80,55,40,30,30,55,15])
+        player = Knight(name,21,7,4,4,3,7,1,10,[copy.deepcopy(iron_lance)],[80,55,40,30,30,60,15])
         askingclass = False
     if playerclass.lower() == "myrmidon":
-        player = Myrmidon(name,20,5,6,7,4,3,2,5,[copy.deepcopy(slim_sword)],[70,40,60,60,45,15,15])
+        player = Myrmidon(name,20,5,6,7,4,3,2,5,[copy.deepcopy(slim_sword)],[70,40,60,60,45,20,20])
         askingclass = False
     if playerclass.lower() == "info":
         print("""Mage - A speedy and accurate user of anima magic. Can't really take physical hits, although magical defense is high. Melts enemies with low resistance.
@@ -65,14 +67,14 @@ stat_map = copy.deepcopy(reg_map) #static map - never changes
 chapter = 0 #chapter we're on
 turn = 1
 #creating franny
-franny = Cavalier("Franny",22,6,8,7,5,5,3,8,[copy.deepcopy(iron_lance),copy.deepcopy(iron_sword),copy.deepcopy(vulnerary)],[85,35,55,55,40,35,20])
+franny = Cavalier("Franny",22,6,9,9,5,5,3,8,[copy.deepcopy(iron_lance),copy.deepcopy(iron_sword),copy.deepcopy(vulnerary)],[85,35,55,55,40,35,25])
 franny.level = 3
 franny.sym = "F"
 franny.x = 3
 franny.y = 7
 #allies.append(franny)
 #creating You Zhou
-yoyo = Lord("Yoyo",18,5,7,5,7,2,4,5,[copy.deepcopy(rapier),copy.deepcopy(fire),copy.deepcopy(vulnerary)],[60,40,65,40,70,10,45])
+yoyo = Lord("Yoyo",18,5,7,5,7,4,4,5,[copy.deepcopy(rapier),copy.deepcopy(fire),copy.deepcopy(vulnerary)],[60,40,65,40,70,20,45])
 yoyo.sym = "Y"
 yoyo.x = 3
 yoyo.y = 3
@@ -85,6 +87,7 @@ movers.append(player)
 movers.append(yoyo)
 running = True
 prologueStory(player.name) #story for prologue
+
 start = True
 #main game loop
 while running:
@@ -118,6 +121,7 @@ while running:
         boss = Brigand("Bandit 1",28,8,4,4,0,5,1,8,[copy.deepcopy(iron_axe)])
         boss.name = "Alex the Bandit"
         boss.canLevel = False
+        boss.canMove = False
         boss.sym = "B"
         boss.gift = 80
         boss.x = 12
@@ -126,11 +130,21 @@ while running:
         #initializing dynamic map (units) and static map (terrain)
         reg_map = copy.deepcopy(lvl1map)
         stat_map = copy.deepcopy(lvl1map)
-        start = False
     for a in allies:
         reg_map[len(reg_map)-1-a.y][a.x] = a.sym
     for e in enemies:
         reg_map[len(reg_map)-1-e.y][e.x] = e.sym
+    if start:
+        showMap(reg_map)
+        print("======LEGEND======")
+        line = 0
+        for u in allies+enemies+all_terr:
+            line += 1
+            print(u.sym,"=",u.name,end=" | ")
+            if line % 5 == 0:
+                print("\n")#creates new line whenever 5 is reached in a line
+        print("\n")
+        start = False        
     comm = input("Enter a command:\n")
     #----------------------QUIT-----------------------#
     if comm.upper() == "QUIT":
@@ -140,8 +154,11 @@ while running:
     elif comm.upper() == "ATTACK":
         #attack function
         a = askUser("Select ally to attack with: ",attackers,player,"allies that can attack")
-        userwants = True
+        userwants = True #does user want to proceed?
         if a == "cancel":
+            userwants = False
+        if not a:
+            print("No allies that can attack!")
             userwants = False
         if userwants:
             weapons = [w for w in a.items if type(w) == Weapon] #creates weapons, let's user equip
@@ -153,13 +170,9 @@ while running:
                 userwants = False
         if userwants:
             a.equip_w(weapon)
-            attackable = []
+            attackable = [] #attackable enemies
             for en in enemies:
-                distx = abs(en.x - a.x)
-                disty = abs(en.y - a.y)
-                dist = distx + disty
-                #distance from enemy to ally
-                if a.equip.rnge <= dist <= a.equip.maxrnge:
+                if a.canAtk(en): #if ally can attack enemy appends enemy to list
                     attackable.append(en)
             e = askUser("Select enemy to attack: ",attackable,player,"attackable enemies",True)
             if e == "cancel":
@@ -194,7 +207,7 @@ while running:
             if not e.alive:
                 enemies.remove(e)
                 reg_map[len(reg_map)-1-e.y][e.x] = stat_map[len(stat_map)-1-e.y][e.x]
-            if not player.alive:
+            if not player.alive or not yoyo.alive:
                 print("GAME OVER")
                 running = False #gonna change this to level restart, for now it kills the program
             attackers.remove(a) #makes sure each unit can only attack once per turn
@@ -213,9 +226,13 @@ while running:
     elif comm.upper() == "MAP":
         #print map
         showMap(reg_map)
-        print("====LEGEND====")
+        print("======LEGEND======")
+        line = 0
         for u in allies+enemies+all_terr:
+            line += 1
             print(u.sym,"=",u.name,end=" | ")
+            if line % 5 == 0:
+                print("\n")#creates new line whenever 5 is reached in a line
         print("\n")
     #-----------------CALCULATE---------------------#
     elif comm.upper() in ["CALC","CALCULATE"]:
@@ -256,11 +273,15 @@ while running:
         if userwants:
             e_sym = [en.sym for en in enemies]
             move_map = moveDisp(a.x,a.y,a.MOVE+1,a.MOVE+1,copy.deepcopy(reg_map),e_sym,a,all_terr)
+            print("======LEGEND======")
             showMap(move_map)
-            #printing legend
-            print("=========LEGEND=========")
+            line = 0
             for u in allies+enemies+all_terr:
+                line += 1
                 print(u.sym,"=",u.name,end=" | ")
+                if line % 5 == 0:
+                    print("\n")#creates new line whenever 5 is reached in a line
+            print("# = movable square")
             print("\n")
             while True:
                 xmove = input("What's the X co-ord of where you move?\n") #where user wants to move unit
@@ -334,7 +355,51 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                 #is when unit used attack for this turn
             if a.canMove and not a in movers:
                 movers.append(a)
-        turn += 1 #add enemy's turn here
+        turn += 1
+        #enemy's AI
+        print("==========ENEMY PHASE=============")
+        for e in enemies:
+            canEnAttack = False #can enemy attack?
+            allies_sym = [a.sym for a in allies]
+            e_movemap = moveDisp(e.x,e.y,e.MOVE+1,e.MOVE+1,copy.deepcopy(reg_map),allies_sym,e,all_terr)
+            moveable = [] #enemies movable squares
+            attackableAllies = [] #attackable Allies
+            for y in range(len(e_movemap)):
+                for x in range(len(e_movemap[0])):
+                    if e_movemap[y][x] in [str(i) for i in range(0,12)]:
+                        moveable.append((x,y))        
+                        en = copy.deepcopy(e)
+                        en.x = x
+                        en.y = y
+                        for a in allies:
+                            if en.canAtk(a) or e.canAtk(a):
+                                canEnAttack = True
+                                attackableAllies.append(a)
+            if not canEnAttack:
+                dist = []#distances from ally
+                xs = [] #x co-ords that co-respond to the distances
+                ys = [] #y co-ords that co-respond to the distances
+                for x,y in moveable:
+                    miniDist = []
+                    miniXs = []
+                    miniYs = []
+                    for a in allies:
+                        distA = abs(x - a.x) + abs(y - a.y)
+                        miniDist.append(distA)
+                        miniXs.append(a.x)
+                        miniYs.append(a.y)
+                    dist.append(min(miniDist))
+                    xs.append(miniXs[miniDist.index(min(miniDist))])
+                    ys.append(miniYs[miniDist.index(min(miniDist))])
+                smallDist = min(dist) #smallest distance
+                movex = xs[dist.index(smallDist)]
+                movey = ys[dist.index(smallDist)]
+                if e.canMove:
+                    reg_map[len(reg_map)-e.y-1][e.x] = stat_map[len(reg_map)-e.y-1][e.x] #removes enemy symbol from place moved from and reverts to normal as found on static map
+                    e.move(movex,movey)
+                    reg_map[len(reg_map)-e.y-1][e.x] = e.sym
+            if not e.canMove:
+                moveable = [(e.x,e.y)]
         #incomplete
     #----------------USE------------------#
     elif comm.upper() == "USE":

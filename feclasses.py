@@ -201,6 +201,18 @@ class Murderer(Person):
         self.CLASS = "Murderer"
         self.canAttack = True
         self.caps = [40,20,20,20,30,20,20]
+    def canAtk(self,enemy,otherweap=False,weap=Weapon("No weapon",0,0,0,0,"",0)):
+        dist = abs(self.x - enemy.x) + abs(self.y - enemy.y)
+        if otherweap:
+            weapon = weap
+        else:
+            weapon = self.equip
+        if not self.canAttack:
+            return False
+        elif weapon.rnge <= dist <= weapon.maxrnge:
+            return True
+        else:
+            return False
     def calculate(self,enemy,terr=0,terr_def=0,unreal=True,stats=False):
         if not self.alive:
             return False
@@ -241,7 +253,7 @@ class Murderer(Person):
         print("Crit:",crit)
         if stats:
             if "--" in [hit,dam,crit]:
-                return((0,0,0)) #returns (hit,damage,crit)
+                return False #returns (hit,damage,crit)
             else:
                 return((hit,dam,crit))
     def attack(self,enemy,terr=0,terr_def=0):
@@ -277,7 +289,7 @@ class Murderer(Person):
             self.strength -= exdam - terr_def
             expgain = damage-self.level #increasing exp
             if expgain > 30:
-                expgain = 20 #caps exp gain at 30
+                expgain = 30 #caps exp gain at 30
             elif expgain <= 0:
                 expgain = 1 #caps exp gain at 1
             print(self.name,"attacked",enemy.name,"for",damage,"damage") #prints damage
@@ -296,10 +308,12 @@ class Murderer(Person):
                             #tries to equip every item in list.
                             #won't print error
                             eq_newItem = True
+                            del self.weapons[self.weapons.index(self.items[i])]
                             del self.items[i]
                             break
                 if not eq_newItem:
                     self.items.remove(self.equip)
+                    self.weapons.remove(self.equip)
                     self.equip = Weapon("No weapon",0,0,0,0,"",0)
                     self.canAttack = False
             return 1

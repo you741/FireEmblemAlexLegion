@@ -26,11 +26,11 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
         return grid                 
     elif curr_spot in [".","|","^","-","山"]:
     #recursive function - passable and standable
-        grid[ym][x] = str(maxmove-move+1)
+        grid[ym][x] = str(maxmove-move)
     elif curr_spot in [str(i) for i in range(1,10)]:
         #marked square, will replace if smaller
         if int(curr_spot) > maxmove-move+1:
-            grid[ym][x] = str(maxmove-move+1)
+            grid[ym][x] = str(maxmove-move)
     elif not move == 1:
         pass
     else:
@@ -118,26 +118,79 @@ def use(item,unit):
         print("Can't use item!")
         return False
 #enemy's AI
-def enemyAI(enemy,allies,movable):
-    for a in allies:
-        weaponTriangle = {"Sword":"Axe",
+def enemyAI(enemy,allies,movable,c=0,cna=True):
+    weaponTriangle = {"Sword":"Axe",
                           "Axe":"Lance",
                           "Lance":"Sword",
                           "Anima":"Light",
                           "Light":"Dark",
                           "Dark":"Anima"}
+    canAllAtk = cna #can all allies attack the enemy?
+    best = [] #best allies to attack - try to reduce to one    
+    for a in allies:
+        #----------Start of enemy's weapon selection---------#
+        #enemy try to attack with a weapon that has the mos disadvantage
         disadv = True
         adv = False
+        ideal_weap = [(-1,-1,999999,999999,0,0,0,0)] #ideal weapons to use against target
+                    #(enemy damage, enemy hit %, ally damage, ally hit %, ally, enemy.x, enemy.y, enemy.weapon)
         for w in enemy.weapons:
-            if weaponTriangle(w.typ) == a.equip.typ:
+            if adv and weaponTriangle(w.typ) != a.equip.typ:
+                continue #will not make ideal weapon if not at advantage when another weapon is
+            elif weaponTriangle(w.typ) == a.equip.typ and not adv:
                 #if enemy has the advantage
                 disadv = False
                 adv = True
-            if weaponTriangle(a.equip.typ) != w.typ:
+                ideal_weap = [w]
+            elif weaponTriangle(a.equip.typ) != w.typ and disadv:
                 #if enemy has a weapon that isn't at a disadvantage
                 disadv = False
-        for w in enemy.weapons:
+                ideal_weap = [w]
+            elif weaponTriangle(a.equip.typ) == w.typ and not disadv:
+                continue #if enemy has weapon that is at a disadvantage when enemy has one that isn't
+            else:
+                ideal_weap.append(w)
+        if len(ideal_weap) == 0:
+            print("YOU ZHOU SOMETHING IS WRONG!!!!!") #lol error message
+        #-----------End of enemy's weapon selection-----------#
+        for w in ideal_weap:
             for x,y in movable:
                 en = copy.deepcopy(enemy)
-                en_a = en.calculate(a,False,True)
-            
+                en.x = x
+                en.y = y
+                en_a = en.calculate(a,0,0,False,True)
+                if not en_a:
+                    continue
+                a_en = a.calculate(en,0,0,False,True)
+                if a_en != False and not canAllAtk:
+                    continue #will not attack ally if another ally can't fight back
+                comparer = (en_a[0],en_a[1],a_en[0],a_en[1],a,x,y,enemy.weapons.index(w)) #stats to compare
+                comparison = comparer[c] > best[0][c] if c in [0,1] else comparer < best[0][c]
+                if not a_en and canAllAtk:
+                    #if an ally cannot attack
+                    a_en = (0,0,0)
+                    canAllAtk = False
+                    best = [comparer]
+                    continue
+                if comparison:
+                    #if comparison (default damage %) is greater than best percentage
+                    best = [comparer]
+                elif comparer[c] == best[0][c]:
+                    #if comparison is equal to the best
+                    #ignore this: best_allies = [b[4] for b in best]
+                    best.append(comparer)
+    if len(best) > 1 and 0 <= c <= 3:
+        #if more than one best will run function again testing the other priorities
+        best_allies = [] #best allies to attack
+        for b in best:
+            if not b[4] in best_allies:
+                    best_allies.append(b[4]) 
+        return enemyAI(enemy,best_allies,movable,c+1,canAllAtk)
+    elif len(best) > 1 and c > 3:
+        #if unable to reduce lower when all priorities used up, will return first value in best
+        return best[0]
+    elif len(best) == 0:
+        print("SOMETHING'S WRONG")
+    elif len(best) == 1:
+        return best[0]
+    
