@@ -239,7 +239,7 @@ class Murderer(Person):
                     break
         hit = self.skill*2 + self.equip.acc + self.luck//2 + mod - terr - enemy.attackspeed*2 - enemy.luck
         dam = self.equip.damage(self,enemy,True)+exdam-terr_def
-        spdam = "x 2" if self.speed - 4 >= enemy.speed else ""
+        spdam = "x 2" if self.attackspeed - 4 >= enemy.attackspeed else ""
         crit = self.skill//2 - enemy.luck + self.equip.crit
         distx = abs(self.x - enemy.x)
         disty = abs(self.y - enemy.y)

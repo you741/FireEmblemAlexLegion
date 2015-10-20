@@ -15,7 +15,13 @@ import copy
 # = = wall - = water * = fog                                    #
 # Any other character is a playable unit                        #
 #===============================================================#
-
+plain = Terrain("Plain",".")
+forest = Terrain("Forest","|",20,1,1)
+mountain = Terrain("Mountain","山",40,2,4)
+hill = Terrain("Hill","^",40,2,4)
+water = Terrain("Water","-",10,0,4)
+wall = Terrain("Wall","=",0,0,0)
+all_terr = [plain,forest,mountain,hill,water,wall]
 def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
     #displays movement for specific units
     ym = len(grid) - 1 - y #y position on map
@@ -119,7 +125,7 @@ def use(item,unit):
         print("Can't use item!")
         return False
 #enemy's AI
-def enemyAI(enemy,allies,movable,c=0,cna=True):
+def enemyAI(enemy,allies,movable,terr_map,c=0,cna=True):
     weaponTriangle = {"Sword":"Axe",
                           "Axe":"Lance",
                           "Lance":"Sword",
@@ -161,10 +167,17 @@ def enemyAI(enemy,allies,movable,c=0,cna=True):
                 en = copy.deepcopy(enemy)
                 en.x = x
                 en.y = y
-                en_a = en.calculate(a,0,0,False,True)
+                for t in all_terr:
+                    if terr_map[len(terr_map)-1-enemy.y][enemy.x] == t.sym:
+                        eter_avo = t.avo
+                        eter_def = t.defen
+                    if terr_map[len(terr_map)-1-a.y][a.x] == t.sym:
+                        ater_avo = t.avo
+                        ater_def = t.defen
+                en_a = en.calculate(a,ater_avo,ater_def,False,True)
                 if not en_a:
                     continue
-                a_en = a.calculate(en,0,0,False,True)
+                a_en = a.calculate(en,eter_avo,eter_def,False,True)
                 if a_en != False and not canAllAtk:
                     continue #will not attack ally if another ally can't fight back
                 comparer = (round(100*en_a[0]/a.hp),en_a[1],round(100*a_en[0]/en.hp),a_en[1],a,x,y,enemy.weapons.index(w)) #stats to compare
@@ -188,7 +201,7 @@ def enemyAI(enemy,allies,movable,c=0,cna=True):
             best_allies.append(b[4])
     if len(best) > 1 and 0 <= c < 3:
         #if more than one best will run function again testing the other priorities
-        return enemyAI(enemy,best_allies,movable,c+1,canAllAtk)
+        return enemyAI(enemy,best_allies,movable,terr_map,c+1,canAllAtk)
     elif len(best) > 1 and c >= 3:
         #if unable to reduce lower when all priorities used up, will return first value in best
         return best[0]

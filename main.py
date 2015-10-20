@@ -31,6 +31,8 @@ plain = Terrain("Plain",".")
 forest = Terrain("Forest","|",20,1,1)
 mountain = Terrain("Mountain","山",40,2,4)
 hill = Terrain("Hill","^",40,2,4)
+water = Terrain("Water","-",10,0,4)
+wall = Terrain("Wall","=",0,0,0)
 #asking user for class
 #creating player's class
 while askingclass:
@@ -54,44 +56,46 @@ Myrmidon - A speedy sword user. Very skillfull with the sword art, but dies easi
     else:
         askmsg = "Your entry is invalid. Please enter mage, knight, myrmidon or info:\n"
 
-player.sym = "P"
-player.x = 3
-player.y = 2
-allies.append(player)
-lvl1map = [["." for i in range(15)]for i in range(12)] #chapter 1 map
-lvl1map[5][5],lvl1map[5][6],lvl1map[4][6] = "|","|","|"
-lvl1_elem = [copy.deepcopy(plain),copy.deepcopy(forest)] #all types of terrain in chapter 1
-reg_map = [] #regular map
-stat_map = copy.deepcopy(reg_map) #static map - never changes
-chapter = 0 #chapter we're on
+chapter = 0
 turn = 1
-#creating franny
-franny = Cavalier("Franny",22,6,9,9,5,5,3,8,[copy.deepcopy(iron_lance),copy.deepcopy(iron_sword),copy.deepcopy(vulnerary)],[85,35,55,55,40,35,25])
-franny.level = 3
-franny.sym = "F"
-franny.x = 3
-franny.y = 7
-#allies.append(franny)
-#creating You Zhou
-yoyo = Lord("Yoyo",18,5,7,5,7,4,4,5,[copy.deepcopy(rapier),copy.deepcopy(fire),copy.deepcopy(vulnerary)],[60,40,65,40,70,20,45])
-yoyo.sym = "Y"
-yoyo.x = 3
-yoyo.y = 3
-allies.append(yoyo)
-attackers = [] #units that can attack this turn
-attackers.append(player)
-attackers.append(yoyo)
-movers = [] #units that can move this turn
-movers.append(player)
-movers.append(yoyo)
-running = True
-prologueStory(player.name) #story for prologue
 start = True
+running = True
 #main game loop
 while running:
     #---------Prologue initialization-------#
     if chapter == 0 and start:
-        #chapter 1 initialization
+        #chapter 0 initialization
+        player.sym = "P"
+        player.x = 3
+        player.y = 2
+        allies.append(player)
+        lvl1map = [["." for i in range(15)]for i in range(12)] #chapter 1 map
+        lvl1map[5][5],lvl1map[5][6],lvl1map[4][6] = "|","|","|"
+        lvl1_elem = [copy.deepcopy(plain),copy.deepcopy(forest)] #all types of terrain in chapter 1
+        reg_map = [] #regular map
+        stat_map = copy.deepcopy(reg_map) #static map - never changes
+        chapter = 0 #chapter we're on
+        turn = 1
+        #creating franny
+        franny = Cavalier("Franny",22,6,9,9,5,5,3,8,[copy.deepcopy(iron_lance),copy.deepcopy(iron_sword),copy.deepcopy(vulnerary)],[85,35,55,55,40,35,25])
+        franny.level = 3
+        franny.sym = "F"
+        franny.x = 3
+        franny.y = 7
+        #allies.append(franny)
+        #creating You Zhou
+        yoyo = Lord("Yoyo",18,5,7,5,7,4,4,5,[copy.deepcopy(rapier),copy.deepcopy(fire),copy.deepcopy(vulnerary)],[60,40,65,40,70,20,45])
+        yoyo.sym = "Y"
+        yoyo.x = 3
+        yoyo.y = 3
+        allies.append(yoyo)
+        attackers = [] #units that can attack this turn
+        attackers.append(player)
+        attackers.append(yoyo)
+        movers = [] #units that can move this turn
+        movers.append(player)
+        movers.append(yoyo)
+        prologueStory(player.name) #story for prologue
         #all terrain list
         all_terr = copy.deepcopy(lvl1_elem)
         #creating enemy1
@@ -110,9 +114,7 @@ while running:
         enemy2.sym = "€"
         enemy3 = copy.deepcopy(enemy1)
         enemy3.name = "Bandit 3"
-        enemy3.x = 11
-        enemy3.y = 7
-        enemy3.sym = "ε"
+        enemy3.x,enemy3.y,enemy3.sym = 11,7,"ε"
         enemies.append(enemy2)
         enemies.append(enemy3)
         #creates boss
@@ -205,8 +207,8 @@ while running:
             if not e.alive:
                 enemies.remove(e)
                 reg_map[len(reg_map)-1-e.y][e.x] = stat_map[len(stat_map)-1-e.y][e.x]
-            #gonna change this to level restart, for now it kills the program
             attackers.remove(a) #makes sure each unit can only attack once per turn
+            print(a.name,"can no longer make an action until you end the turn")
             if a in movers:
                 movers.remove(a)
     #------------------DISPLAY---------------------#
@@ -222,7 +224,7 @@ while running:
     elif comm.upper() == "MAP":
         #print map
         showMap(reg_map)
-        print("======LEGEND======")
+        print("==================LEGEND==================")
         line = 0
         for u in allies+enemies+all_terr:
             line += 1
@@ -269,7 +271,7 @@ while running:
         if userwants:
             e_sym = [en.sym for en in enemies]
             move_map = moveDisp(a.x,a.y,a.MOVE+1,a.MOVE+1,copy.deepcopy(reg_map),e_sym,a,all_terr)
-            print("======LEGEND======")
+            print("==================LEGEND==================")
             showMap(move_map)
             line = 0
             for u in allies+enemies+all_terr:
@@ -281,8 +283,11 @@ while running:
             print("\n")
             while True:
                 xmove = input("What's the X co-ord of where you move?\n") #where user wants to move unit
+                if xmove.lower() == "cancel":
+                    print("Cancelled")
+                    break
                 ymove = input("What's the Y co-ord of where you move?\n")
-                if xmove.lower() == "cancel" or ymove.lower() == "cancel":
+                if ymove.lower() == "cancel":
                     print("Cancelled")
                     break
                 try:
@@ -318,34 +323,160 @@ while running:
             u.show_items()
     #-------------------EQUIP--------------------#
     elif comm.upper() == "EQUIP":
-        a = askUser("Pick ally to equip a weapon to: ",allies,player,"allies")
+        a = askUser("Pick ally to equip a weapon to: ",attackers,player,"allies")
         userwants = True
         if a == "cancel":
             userwants = False
+        if not a:
+            print("No allies that can equip! End your turn!")
+            userwants = False
         if userwants:
             print(a.name+"'s items")
-            weapons = [w for w in a.items if type(w) == Weapon]
-            eq = askUser("Pick weapon to equip to: ",weapons,player,"items",True)
-            if not eq == "cancel":
+            eq = askUser("Pick weapon to equip to: ",a.weapons,player,"items",True)
+            if not eq:
+                print("No weapons to equip!")
+            if not eq == "cancel" and not (not eq):
                 a.equip_w(eq)
+    #------------------TRADE---------------------#
+    elif comm.upper() == "TRADE":
+        a = askUser("Pick first ally to trade with: ",attackers,player,"allies")
+        userwants = True
+        if a == "cancel":
+            userwants = False
+        if not a:
+            userwants = False
+            print("No allies that can trade! End your turn!")
+        if userwants:
+            tradable_allies = [al for al in allies if al != a and (abs(a.x - al.x) + abs(a.y - al.y)) <= 1]
+            a2 = askUser("Pick 2nd ally to trade with: ",tradable_allies,player,"allies")
+        if not a2:
+            print("No allies to trade with",a.name,"!")
+            userwants = False
+        if a2 == "cancel":
+            userwants = False
+        if userwants:
+            #fdispitem refers to the full display of an item
+            #trading loop
+            while True:
+                fdispitem_a = []
+                fdispitem_a2 = []
+                for i in range(5):
+                    if len(a.items) > i:
+                        fdispitem_a.append(a.items[i])
+                    else:
+                        fdispitem_a.append(Item("No item",0))
+                for i in range(5):
+                    if len(a2.items) > i:
+                        fdispitem_a2.append(a2.items[i])
+                    else:
+                        fdispitem_a2.append(Item("No item",0))
+                print("Will now enable item trading, type 'cancel' to exit anytime")
+                i1 = askUser("Select item from "+a.name+" (select 'no item' to take): ",fdispitem_a,player,"items",True)
+                if i1 == "cancel":
+                    break
+                if not i1:
+                    print("No items to trade!")
+                    break
+                i2 = askUser("Select item from "+a2.name+" (select 'no item' to give): ",fdispitem_a2,player,"items",True)
+                if i2 == "cancel":
+                    break
+                if not i1:
+                    print("No items to trade!")
+                    break
+                #trading items
+                if i1.name == "No item" and i2.name == "No item":
+                    print("Um you can't trade no item with another guys no item.")
+                    continue
+                if not i1.name == "No item" and not i2.name == "No item":
+                    a.items[a.items.index(i1)],a2.items[a2.items.index(i2)] = a2.items[a2.items.index(i2)],a.items[a.items.index(i1)]
+                elif i1.name == "No item":
+                    a2.items.remove(i2)
+                    a.items.append(i2)
+                elif i2.name == "No item":
+                    a2.items.append(i1)
+                    a.items.remove(i1)
+                print("Traded",a.name,"'s",i1.name,"with",a2.name,"'s",i2.name)
+                if type(i1) == Weapon:
+                    a2.weapons.append(i1)
+                    a.weapons.remove(i1)
+                if type(i2) == Weapon:
+                    a2.weapons.remove(i2)
+                    a.weapons.append(i2)
+                if i1 == a.equip:
+                    a.equip = Weapon("No weapon",0,0,0,0,"",0)
+                    #If item selected is equipped item
+                    if type(i2) == Weapon:
+                        #if 2nd item selected is a weapon
+                        if a.wskl[i2.typ] >= i2.mast or a.name == i2.prf:
+                            #if user can use given weapon
+                            a.equip_w(i2,False)
+                if a.equip.name == "No weapon":
+                    #equips closest weapon or none at all if none
+                    for i in range(len(a.weapons)):
+                        if type(a.weapons[i]) == Weapon:
+                            if a.equip_w(a.weapons[i],False):
+                                #tries to equip every item in list.
+                                #won't print error
+                                break
+                if i2 == a2.equip:
+                    a2.equip = Weapon("No weapon",0,0,0,0,"",0)
+                    #If 2nd item selected is equipped item
+                    if type(i1) == Weapon:
+                        #if 1st item selected is a weapon
+                        if a2.wskl[i1.typ] >= i1.mast or a2.name == i1.prf:
+                            #if user can use given weapon
+                            a2.equip_w(i1,False)
+                if a2.equip.name == "No weapon":
+                    #equips closest weapon or none at all if none
+                    for i in range(len(a2.weapons)):
+                        if type(a2.weapons[i]) == Weapon:
+                            if a2.equip_w(a2.weapons[i],False):
+                                #tries to equip every item in list.
+                                #won't print error
+                                break
+                cont = input("Do another trade amongst these two? [Y to confirm, any other key to reject]\n")
+                if cont.lower() in ["yes","y","ok","sure","affirmative"]:
+                    pass
+                else:
+                    print("Ended trading")
+                    break
+    #----------------USE------------------#
+    elif comm.upper() == "USE":
+        a = askUser("Pick ally to use item of: ",attackers,player,"allies")
+        userwants = True
+        if a == "cancel":
+            userwants = False
+        if not a:
+            print("No allies that can use an item! End your turn!")
+            userwants = False
+        if userwants:
+            i = askUser("Pick item: ",a.items,player,"items",True)
+            if not i:
+                print("No items!")
+                userwants = False
+            if i == "cancel":
+                userwants = False
+        if userwants:
+            use(i,a)
     #------------------HELP------------------#
     elif comm.upper() == "HELP":
         print("""QUIT - leave the game (why would u do that?)
 DISPLAY - display an units name
 CALCULATE - calculate an ally against an enemy
 MAP - Display map
-MOVE (INC) - Move an ally
-ATTACK (Movement data INC) - What do you think it does? Heal?
+MOVE - Move an ally
+ATTACK - What do you think it does? Heal?
 ITEM - Views items
 EQUIP - Selects weapon to equip
 USE - Selects item to use
+TRADE - Trades items amongst allies
 END - Ends your turn, and then enemies can attack you. Be careful when you do this man.""")
     #------------------END----------------#
     elif comm.upper() == "END":
         print("You have ended your turn!")
         turn += 1
         #enemy's AI
-        print("==========ENEMY PHASE=============")
+        print("===============ENEMY PHASE================")
         for e in enemies:
             print(e.name,"has started")
             canEnAttack = False #can enemy attack?
@@ -360,6 +491,7 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                         en = copy.deepcopy(e)
                         en.x = x
                         en.y = y
+                        
                         for a in allies:
                             if en.canAtk(a) or e.canAtk(a):
                                 canEnAttack = True
@@ -391,7 +523,7 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
             if not e.canMove:
                 moveable = [(e.x,e.y)]
             if canEnAttack:
-                ally_data = enemyAI(e,attackableAllies,moveable)
+                ally_data = enemyAI(e,attackableAllies,moveable,stat_map)
                 a = ally_data[4]
                 if a == 0:
                     print(e.name,"has finished turn")
@@ -415,9 +547,7 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
             if e.alive:
                 print(e.name,"has finished turn")
             time.sleep(1)
-        for e in enemies:
-            if not e.alive:
-                enemies.remove(e) #removes all enemies
+        enemies = [e for e in enemies if e.alive] #removes all enemies that are dead
         for a in allies:
             if a.alive:
                 if a.canAttack and not a in attackers:
@@ -428,28 +558,24 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                     #is when unit used attack for this turn
                 if a.canMove and not a in movers:
                     movers.append(a)
-        #incomplete
-    #----------------USE------------------#
-    elif comm.upper() == "USE":
-        a = askUser("Pick ally to use item of: ",allies,player,"allies")
-        userwants = True
-        if a == "cancel":
-            userwants = False
-        if userwants:
-            i = askUser("Pick item: ",a.items,player,"items",True)
-            if i == "cancel":
-                userwants = False
-        if userwants:
-            use(i,a)
+        print("==============PLAYER PHASE================")
     #----------------INVALIDE-------------#
     else:
         print("Invalid command. Type HELP for help.")
     #---------Whether user beats chapter or not--------#
     if chapter == 0 and len(enemies) == 0:
         print("You beat the Prologue!")
+        print("CHAPTER COMPLETE!")
         start = True
         chapter += 1
     #---------IF player or Yoyo dies you lose---------#
     if not player.alive or not yoyo.alive:
         print("GAME OVER")
-        running = False 
+        print("Restarting chapter...")
+        time.sleep(1)
+        print(".....................")
+        time.sleep(1)
+        print(".....................")
+        chapter = 0
+        start = True
+        turn = 1

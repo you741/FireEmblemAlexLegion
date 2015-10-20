@@ -62,6 +62,6 @@ def prologueStory(name):
     a = input()
     print("Yoyo: Alright then! But don't get yourself killed!")
     time.sleep(1)
-    print("===========PLAYER PHASE============")
+    print("==============PLAYER PHASE================")
     print("Defeat all enemies!")
     
