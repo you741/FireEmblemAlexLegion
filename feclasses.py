@@ -27,13 +27,14 @@ weaponTriangle = [("Sword","Axe"),("Axe","Lance"),("Lance","Sword"),("Anima","Li
 #^list full of wt advantages (adv,disadv)
 
 class Person:
-    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+    def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
         self.name = name #units name
         self.hp = hp #stats
         self.maxhp = hp
         self.strength = stren
         self.speed = spd
-        self.dexterity = dex
+        self.attackspeed = spd #attack speed
+        self.skill = skl
         self.defense = defen
         self.luck = lck
         self.resistance = res
@@ -46,9 +47,8 @@ class Person:
         self.y = 0
         self.items = items
         self.weapons = [w for w in self.items if type(w) == Weapon] #weapons
-        self.equip = self.weapons[0] if len(self.weapons) > 0 else Weapon("No weapon",0,0,0,0,"",0)
         self.growths = growths #growths are in the following format
-                          #[hp,str,dex,spd,lck,def,res]
+                          #[hp,str,skl,spd,lck,def,res]
         self.level = 1
         self.canLevel = True #can unit level?
         self.exp = 0 #experience
@@ -58,7 +58,6 @@ class Person:
         self.promoteC = "Person" #what class promotes to
         self.caps = [40,20,20,20,20,20,20]
         self.sym = "人" #symbol as appeared on map
-        self.attackspeed = spd #attack speed
         self.canAttack = False
         self.canMove = True
         self.flying = False
@@ -88,7 +87,7 @@ class Person:
         print("Level:",self.level)
         print("HP: ",self.hp,"/",self.maxhp,sep="")
         print("Stength:",self.strength)
-        print("Dexterity:",self.dexterity)
+        print("Skill:",self.skill)
         print("Speed:",self.speed)
         print("Luck:",self.luck) 
         print("Defense:",self.defense)
@@ -123,9 +122,9 @@ class Person:
                         self.strength += 1
                         print("Strength increased to",self.strength)
                 if i == 2 and self.growths[i] > random_number:
-                    if not self.dexterity >= self.caps[i]:
-                        self.dexterity += 1
-                        print("Dexterity increased to",self.dexterity)
+                    if not self.skill >= self.caps[i]:
+                        self.skill += 1
+                        print("Skill increased to",self.skill)
                 if i == 3 and self.growths[i] > random_number:
                     if not self.speed >= self.caps[i]:
                         self.speed += 1
@@ -154,7 +153,7 @@ class Person:
             print("Exp:",self.exp,"/100")
     def promote(self):
         if promoteC == "Person":
-            promoted = Person(self.name,self.maxhp,self.strength,self.speed,self.dexterity,self.defense,self.luck,self.resistance,self.constitution,self.growths)
+            promoted = Person(self.name,self.maxhp,self.strength,self.speed,self.skill,self.defense,self.luck,self.resistance,self.constitution,self.growths)
             promoted.wskl = self.wskl
         return promoted
     def add_item(self,item,err=True):
@@ -196,11 +195,16 @@ class Person:
     
 #Murderer Class is basis for all fighting classes
 class Murderer(Person):
-    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
-        super(Murderer,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,items,growths)
+    def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+        super(Murderer,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
         self.CLASS = "Murderer"
         self.canAttack = True
         self.caps = [40,20,20,20,30,20,20]
+        self.equip = self.weapons[0] if len(self.weapons) > 0 else Weapon("No weapon",0,0,0,0,"",0)
+        if self.equip.wt > self.constitution:
+            self.attackspeed += self.constitution - self.equip.wt
+            if self.attackspeed < 0:
+                self.attackspeed = 0
     def canAtk(self,enemy,otherweap=False,weap=Weapon("No weapon",0,0,0,0,"",0)):
         dist = abs(self.x - enemy.x) + abs(self.y - enemy.y)
         if otherweap:
@@ -233,10 +237,10 @@ class Murderer(Person):
                     exdam = -1
                     disoradv = "(Disadvantage)"
                     break
-        hit = self.dexterity*2 + self.equip.acc + self.luck//2 + mod - terr - enemy.attackspeed*2 - enemy.luck
+        hit = self.skill*2 + self.equip.acc + self.luck//2 + mod - terr - enemy.attackspeed*2 - enemy.luck
         dam = self.equip.damage(self,enemy,True)+exdam-terr_def
         spdam = "x 2" if self.speed - 4 >= enemy.speed else ""
-        crit = self.dexterity//2 - enemy.luck + self.equip.crit
+        crit = self.skill//2 - enemy.luck + self.equip.crit
         distx = abs(self.x - enemy.x)
         disty = abs(self.y - enemy.y)
         dist = distx + disty #enemy distance
@@ -245,17 +249,18 @@ class Murderer(Person):
             dam = "--"
             crit = "--"
             #displays no values if not in range
-        print(self.name)
-        print("Weapon:",self.equip.name,disoradv)
-        print("HP:",self.hp,"/",self.maxhp)
-        print("Hit:",hit)
-        print("Dam:",dam,spdam)
-        print("Crit:",crit)
+        if not stats:
+            print(self.name)
+            print("Weapon:",self.equip.name,disoradv)
+            print("HP:",self.hp,"/",self.maxhp)
+            print("Hit:",hit)
+            print("Dam:",dam,spdam)
+            print("Crit:",crit)
         if stats:
             if "--" in [hit,dam,crit]:
-                return False #returns (hit,damage,crit)
+                return False #returns (damahe,hit,crit)
             else:
-                return((hit,dam,crit))
+                return((dam,hit,crit))
     def attack(self,enemy,terr=0,terr_def=0):
         if not self.canAttack:
             return False
@@ -283,7 +288,7 @@ class Murderer(Person):
                     exdam = -1
                     break
         #calculates if enemy was hit   
-        if self.dexterity*2 + self.luck//2 + self.equip.acc - enemy.attackspeed*2 - enemy.luck + terr + mod > randint(0,99):
+        if self.skill*2 + self.luck//2 + self.equip.acc - enemy.attackspeed*2 - enemy.luck + terr + mod > randint(0,99):
             self.strength += exdam - terr_def
             damage = self.equip.damage(self,enemy) #damage done to enemy
             self.strength -= exdam - terr_def
@@ -292,7 +297,7 @@ class Murderer(Person):
                 expgain = 30 #caps exp gain at 30
             elif expgain <= 0:
                 expgain = 1 #caps exp gain at 1
-            print(self.name,"attacked",enemy.name,"for",damage,"damage") #prints damage
+            print(self.name,"attacked",enemy.name,"with",self.equip.name,"for",damage,"damage") #prints damage
             enemy.losehp(damage)#enemy loses hp
             if enemy.hp <= 0:
                 print(enemy.name,"died") #if enemy dies it will print
@@ -360,8 +365,8 @@ class Murderer(Person):
             self.wskl[typ] = 600
 #-----------LORD-------------#
 class Lord(Murderer):
-    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
-        super(Lord,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,items,growths)
+    def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+        super(Lord,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
         self.CLASS = "Lord"
         self.promoteC = "Nerd Lord"
         self.magical = True
@@ -369,31 +374,31 @@ class Lord(Murderer):
         self.wskl["Anima"] = 100
 #-----------MAGE-------------#
 class Mage(Murderer):
-    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
-        super(Mage,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,items,growths)
+    def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+        super(Mage,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
         self.CLASS = "Mage"
         self.promoteC = "Sage"
         self.magical = True
         self.wskl["Anima"] = 200
 #----------KNIGHT------------#
 class Knight(Murderer):
-    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
-        super(Knight,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,items,growths)
+    def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+        super(Knight,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
         self.CLASS = "Knight"
         self.promoteC = "General"
         self.wskl["Lance"] = 200
         self.MOVE = 4
 #---------MYRMIDON-----------#
 class Myrmidon(Murderer):
-    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
-        super(Myrmidon,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,items,growths)
+    def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+        super(Myrmidon,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
         self.CLASS = "Myrmidon"
         self.promoteC = "Swordmaster"
         self.wskl["Sword"] = 200
 #---------CAVALIER-----------#
 class Cavalier(Murderer):
-    def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
-        super(Cavalier,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,items,growths)
+    def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+        super(Cavalier,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
         self.CLASS = "Cavalier"
         self.mounted = True
         self.promoteC = "Paladin"
@@ -402,8 +407,8 @@ class Cavalier(Murderer):
         self.wskl["Sword"] = 100
 #-----------BRIGAND----------#
 class Brigand(Murderer):
-     def __init__(self,name,hp,stren,dex,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
-        super(Brigand,self).__init__(name,hp,stren,dex,spd,lck,defen,res,con,items,growths)
+     def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+        super(Brigand,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
         self.CLASS = "Brigand"
         self.mountainous = True
         self.wskl["Axe"] = 200

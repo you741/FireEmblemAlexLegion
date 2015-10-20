@@ -50,7 +50,7 @@ class Weapon(Item):
         else:
             defenses = enemy.defense
         dmg = ally.strength + might - defenses
-        if ally.dexterity//2 + self.crit - enemy.luck > randint(0,99):
+        if ally.skill//2 + self.crit - enemy.luck > randint(0,99):
             if not calc:
                 dmg *= 3
                 print("CRITICAL HIT!")

@@ -58,7 +58,6 @@ player.sym = "P"
 player.x = 3
 player.y = 2
 allies.append(player)
-
 lvl1map = [["." for i in range(15)]for i in range(12)] #chapter 1 map
 lvl1map[5][5],lvl1map[5][6],lvl1map[4][6] = "|","|","|"
 lvl1_elem = [copy.deepcopy(plain),copy.deepcopy(forest)] #all types of terrain in chapter 1
@@ -87,7 +86,6 @@ movers.append(player)
 movers.append(yoyo)
 running = True
 prologueStory(player.name) #story for prologue
-
 start = True
 #main game loop
 while running:
@@ -97,7 +95,7 @@ while running:
         #all terrain list
         all_terr = copy.deepcopy(lvl1_elem)
         #creating enemy1
-        enemy1 = Brigand("Bandit 1",20,6,2,2,0,3,0,8,[copy.deepcopy(iron_axe)])
+        enemy1 = Brigand("Bandit 1",20,5,2,2,0,3,0,8,[copy.deepcopy(iron_axe)])
         enemy1.canLevel = False
         enemy1.gift = 50
         enemy1.sym = "E"
@@ -107,12 +105,12 @@ while running:
         #creating enemies 2 and 3
         enemy2 = copy.deepcopy(enemy1)
         enemy2.name = "Bandit 2"
-        enemy2.x = 1
-        enemy2.y = 5
+        enemy2.x = 12
+        enemy2.y = 1
         enemy2.sym = "€"
         enemy3 = copy.deepcopy(enemy1)
         enemy3.name = "Bandit 3"
-        enemy3.x = 3
+        enemy3.x = 11
         enemy3.y = 7
         enemy3.sym = "ε"
         enemies.append(enemy2)
@@ -168,7 +166,7 @@ while running:
             if not weapon:
                 print("This unit has no weapon!")
                 userwants = False
-        if userwants:
+        if userwants:   
             a.equip_w(weapon)
             attackable = [] #attackable enemies
             for en in enemies:
@@ -196,9 +194,9 @@ while running:
                     ater_def = t.defen
             a.attack(e,ater_avo,ater_def)
             e.attack(a,eter_avo,eter_def)
-            if a.speed >= e.speed + 4 and e.alive:
+            if a.attackspeed >= e.attackspeed + 4 and e.alive:
                 a.attack(e)
-            elif a.speed <= e.speed - 4 and a.alive:
+            elif a.attackspeed <= e.attackspeed - 4 and a.alive:
                 e.attack(a)
                 asking = False
             if not a.alive:
@@ -207,9 +205,7 @@ while running:
             if not e.alive:
                 enemies.remove(e)
                 reg_map[len(reg_map)-1-e.y][e.x] = stat_map[len(stat_map)-1-e.y][e.x]
-            if not player.alive or not yoyo.alive:
-                print("GAME OVER")
-                running = False #gonna change this to level restart, for now it kills the program
+            #gonna change this to level restart, for now it kills the program
             attackers.remove(a) #makes sure each unit can only attack once per turn
             if a in movers:
                 movers.remove(a)
@@ -346,15 +342,6 @@ USE - Selects item to use
 END - Ends your turn, and then enemies can attack you. Be careful when you do this man.""")
     #------------------END----------------#
     elif comm.upper() == "END":
-        for a in allies:
-            if a.canAttack and not a in attackers:
-                attackers.append(a)
-                #difference between attackers list and attribute
-                #can attack is can attack is when unit
-                #cannot attack due to a condition and attackers
-                #is when unit used attack for this turn
-            if a.canMove and not a in movers:
-                movers.append(a)
         turn += 1
         #enemy's AI
         print("==========ENEMY PHASE=============")
@@ -366,7 +353,7 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
             attackableAllies = [] #attackable Allies
             for y in range(len(e_movemap)):
                 for x in range(len(e_movemap[0])):
-                    if e_movemap[y][x] in [str(i) for i in range(0,12)]:
+                    if e_movemap[len(e_movemap) - 1 - y][x] in [str(i) for i in range(0,12)]:
                         moveable.append((x,y))        
                         en = copy.deepcopy(e)
                         en.x = x
@@ -375,6 +362,7 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                             if en.canAtk(a) or e.canAtk(a):
                                 canEnAttack = True
                                 attackableAllies.append(a)
+                    
             if not canEnAttack:
                 dist = []#distances from ally
                 xs = [] #x co-ords that co-respond to the distances
@@ -386,8 +374,8 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                     for a in allies:
                         distA = abs(x - a.x) + abs(y - a.y)
                         miniDist.append(distA)
-                        miniXs.append(a.x)
-                        miniYs.append(a.y)
+                        miniXs.append(x)
+                        miniYs.append(y)
                     dist.append(min(miniDist))
                     xs.append(miniXs[miniDist.index(min(miniDist))])
                     ys.append(miniYs[miniDist.index(min(miniDist))])
@@ -400,6 +388,36 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                     reg_map[len(reg_map)-e.y-1][e.x] = e.sym
             if not e.canMove:
                 moveable = [(e.x,e.y)]
+            if canEnAttack:
+                ally_data = enemyAI(e,allies,moveable)
+                a = ally_data[4]
+                reg_map[len(reg_map)-e.y-1][e.x] = stat_map[len(reg_map)-e.y-1][e.x] #removes enemy symbol from place moved from and reverts to normal as found on static map
+                e.move(ally_data[5],ally_data[6])
+                reg_map[len(reg_map)-e.y-1][e.x] = e.sym
+                e.equip_w(ally_data[6],False)
+                e.attack(a)
+                a.attack(e)
+                if a.attackspeed - 4 >= e.attackspeed:
+                    a.attack(e)
+                elif e.attackspeed -4 >= a.attackspeed:
+                    e.attack(e)
+                if not e.alive:
+                    enemies.remove(e)
+                    reg_map[len(reg_map) - e.y - 1][e.x] = stat_map[len(stat_map) - 1 - e.y][e.x]
+                if not a.alive:
+                    allies.remove(a)
+                    reg_map[len(reg_map) - a.y - 1][a.x] = stat_map[len(stat_map) - 1 - a.y][a.x]
+            time.sleep(1)
+        for a in allies:
+            if a.alive:
+                if a.canAttack and not a in attackers:
+                    attackers.append(a)
+                    #difference between attackers list and attribute
+                    #can attack is can attack is when unit
+                    #cannot attack due to a condition and attackers
+                    #is when unit used attack for this turn
+                if a.canMove and not a in movers:
+                    movers.append(a)
         #incomplete
     #----------------USE------------------#
     elif comm.upper() == "USE":
@@ -421,3 +439,7 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
         print("You beat the Prologue!")
         start = True
         chapter += 1
+    #---------IF player or Yoyo dies you lose---------#
+    if not player.alive or not yoyo.alive:
+        print("GAME OVER")
+        running = False 
