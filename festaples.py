@@ -22,7 +22,7 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
     curr_spot = grid[ym][x] #current spot on map
     if move <= 0:
         return grid                #special terrain handling
-    elif curr_spot in enemies or (ally.mounted and curr_spot == "^") or (not ally.flying and curr_spot in ["^","-","=","山"]) or (not ally.waterproof and curr_spot == "-") or (not ally.mountainous and curr_spot == "山"):
+    elif curr_spot in enemies or (ally.mounted and curr_spot == "^") or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "山"):
         #checks if space modified is occupied or insurpassable
         return grid                 
     elif curr_spot in [".","|","^","-","山"]:
@@ -185,9 +185,8 @@ def enemyAI(enemy,allies,movable,c=0,cna=True):
     best_allies = [] #best allies to attack
     for b in best:
         if not b[4] in best_allies:
-            best_allies.append(b[4]) 
+            best_allies.append(b[4])
     if len(best) > 1 and 0 <= c < 3:
-        print(best)
         #if more than one best will run function again testing the other priorities
         return enemyAI(enemy,best_allies,movable,c+1,canAllAtk)
     elif len(best) > 1 and c >= 3:

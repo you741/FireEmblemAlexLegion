@@ -342,10 +342,12 @@ USE - Selects item to use
 END - Ends your turn, and then enemies can attack you. Be careful when you do this man.""")
     #------------------END----------------#
     elif comm.upper() == "END":
+        print("You have ended your turn!")
         turn += 1
         #enemy's AI
         print("==========ENEMY PHASE=============")
         for e in enemies:
+            print(e.name,"has started")
             canEnAttack = False #can enemy attack?
             allies_sym = [a.sym for a in allies]
             e_movemap = moveDisp(e.x,e.y,e.MOVE+1,e.MOVE+1,copy.deepcopy(reg_map),allies_sym,e,all_terr)
@@ -389,8 +391,12 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
             if not e.canMove:
                 moveable = [(e.x,e.y)]
             if canEnAttack:
-                ally_data = enemyAI(e,allies,moveable)
+                ally_data = enemyAI(e,attackableAllies,moveable)
                 a = ally_data[4]
+                if a == 0:
+                    print(e.name,"has finished turn")
+                    time.sleep(1)
+                    continue
                 reg_map[len(reg_map)-e.y-1][e.x] = stat_map[len(reg_map)-e.y-1][e.x] #removes enemy symbol from place moved from and reverts to normal as found on static map
                 e.move(ally_data[5],ally_data[6])
                 reg_map[len(reg_map)-e.y-1][e.x] = e.sym
@@ -400,14 +406,18 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                 if a.attackspeed - 4 >= e.attackspeed:
                     a.attack(e)
                 elif e.attackspeed -4 >= a.attackspeed:
-                    e.attack(e)
+                    e.attack(a)
                 if not e.alive:
-                    enemies.remove(e)
                     reg_map[len(reg_map) - e.y - 1][e.x] = stat_map[len(stat_map) - 1 - e.y][e.x]
                 if not a.alive:
                     allies.remove(a)
                     reg_map[len(reg_map) - a.y - 1][a.x] = stat_map[len(stat_map) - 1 - a.y][a.x]
+            if e.alive:
+                print(e.name,"has finished turn")
             time.sleep(1)
+        for e in enemies:
+            if not e.alive:
+                enemies.remove(e) #removes all enemies
         for a in allies:
             if a.alive:
                 if a.canAttack and not a in attackers:
