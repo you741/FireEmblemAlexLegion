@@ -60,6 +60,7 @@ chapter = 0
 turn = 1
 start = True
 running = True
+
 #main game loop
 while running:
     #---------Prologue initialization-------#
@@ -130,13 +131,15 @@ while running:
         #initializing dynamic map (units) and static map (terrain)
         reg_map = copy.deepcopy(lvl1map)
         stat_map = copy.deepcopy(lvl1map)
+        all_allies = [player,yoyo] #all_allies
+        allies = all_allies
     for a in allies:
         reg_map[len(reg_map)-1-a.y][a.x] = a.sym
     for e in enemies:
         reg_map[len(reg_map)-1-e.y][e.x] = e.sym
     if start:
         showMap(reg_map)
-        print("======LEGEND======")
+        print("==================LEGEND==================")
         line = 0
         for u in allies+enemies+all_terr:
             line += 1
@@ -566,11 +569,16 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
     if chapter == 0 and len(enemies) == 0:
         print("You beat the Prologue!")
         print("CHAPTER COMPLETE!")
+        all_allies = allies #seeds out dead allies
         start = True
         chapter += 1
     #---------IF player or Yoyo dies you lose---------#
     if not player.alive or not yoyo.alive:
         print("GAME OVER")
+        player.alive = True
+        yoyo.alive = True
+        enemy = []
+        allies = []
         print("Restarting chapter...")
         time.sleep(1)
         print(".....................")
