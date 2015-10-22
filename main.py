@@ -9,8 +9,6 @@ from feweapons import *
 from festory import *
 import copy
 import time
-allies = []
-enemies = []
 name = input("Enter your name:\n")
 name = name.upper()
 askingclass = True
@@ -60,7 +58,14 @@ chapter = 0
 turn = 1
 start = True
 running = True
-
+allies = [] #allies in current chapter
+attackers = [] #allies that can attack
+movers = [] #allies that can move
+enemies = [] #enemies
+all_allies = []#all allies
+all_terr = [] #all terrain
+reg_map = [] #regular map
+stat_map = [] #static terrain map
 #main game loop
 while running:
     #---------Prologue initialization-------#
@@ -90,10 +95,8 @@ while running:
         yoyo.x = 3
         yoyo.y = 3
         allies.append(yoyo)
-        attackers = [] #units that can attack this turn
         attackers.append(player)
         attackers.append(yoyo)
-        movers = [] #units that can move this turn
         movers.append(player)
         movers.append(yoyo)
         prologueStory(player.name) #story for prologue
@@ -131,8 +134,7 @@ while running:
         #initializing dynamic map (units) and static map (terrain)
         reg_map = copy.deepcopy(lvl1map)
         stat_map = copy.deepcopy(lvl1map)
-        all_allies = [player,yoyo] #all_allies
-        allies = all_allies
+        all_allies = allies #sets all allies that should be here this chapter
     for a in allies:
         reg_map[len(reg_map)-1-a.y][a.x] = a.sym
     for e in enemies:
@@ -221,6 +223,9 @@ while running:
         userwants = True #does user want to proceed?
         if a == "cancel":
             userwants = False
+        if not a:
+            print("No units")
+            userwants = False
         if userwants:
             a.display()
     #---------------------MAP----------------------#
@@ -242,9 +247,15 @@ while running:
         userwants = True
         if a == "cancel":
             userwants = False
+        if not a:
+            print("No allies")
+            userwants = False
         if userwants:
             e = askUser("Select enemy to calculate with: ",enemies,player,"enemies",True)
         if e == "cancel":
+            userwants = False
+        if not e:
+            print("No enemies")
             userwants = False
         if userwants:
             eter_avo = 0 #enemy terrain avoid and defense
@@ -270,7 +281,7 @@ while running:
             userwants = False
         if not a:
             userwants = False
-            print("No allies that can move!")
+            print("No allies that can move! End your turn if you want them to!")
         if userwants:
             e_sym = [en.sym for en in enemies]
             move_map = moveDisp(a.x,a.y,a.MOVE+1,a.MOVE+1,copy.deepcopy(reg_map),e_sym,a,all_terr)
@@ -320,6 +331,9 @@ while running:
         u = askUser("Pick unit to view items of: ",allies+enemies,player,"units")
         userwants = True #does user want to continue with action
         if u == "cancel":
+            userwants = False
+        if not u:
+            print("No units")
             userwants = False
         if userwants:
             print(u.name+"'s items")
@@ -461,6 +475,20 @@ while running:
                 userwants = False
         if userwants:
             use(i,a)
+    #----------------TERRAIN-----------------#
+    elif comm.upper() == "TERRAIN":
+        u = askUser("Pick unit to view terrain of: ",allies+enemies,player,"units")
+        userwants = True #does user want to continue with action
+        if u == "cancel":
+            userwants = False
+        if not u:
+            print("No units")
+            userwants = False
+        if userwants:
+            for t in all_terr:
+                if t.sym == stat_map[len(stat_map) - 1 - u.y][u.x]:
+                    print(u.name,"is standing on a",t.name,"terrain")
+                    break
     #------------------HELP------------------#
     elif comm.upper() == "HELP":
         print("""QUIT - leave the game (why would u do that?)
@@ -473,6 +501,7 @@ ITEM - Views items
 EQUIP - Selects weapon to equip
 USE - Selects item to use
 TRADE - Trades items amongst allies
+TERRAIN - Display terrain unit is on
 END - Ends your turn, and then enemies can attack you. Be careful when you do this man.""")
     #------------------END----------------#
     elif comm.upper() == "END":
@@ -577,7 +606,7 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
         print("GAME OVER")
         player.alive = True
         yoyo.alive = True
-        enemy = []
+        enemies = []
         allies = []
         print("Restarting chapter...")
         time.sleep(1)
