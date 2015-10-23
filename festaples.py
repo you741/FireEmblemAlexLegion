@@ -111,14 +111,22 @@ def askUser(ques,li,player,obj="units",nodisplayer=False,attr=""):
 #uses an item
 def use(item,unit):
     if item.name == "Vulnerary":
+        if unit.hp == unit.maxhp:
+            print("Lol",unit.name,"has full health")
+            return False
         unit.gainhp(10)
-        item.use()
         print(unit.name,"healed to",unit.hp,"with Vulnerary")
+        if item.use():
+            return -1
         return True
     elif item.name == "Elixir":
+        if unit.hp == unit.maxhp:
+            print("Lol",unit.name,"has full health")
+            return False
         unit.hp = unit.maxhp
-        item.use()
         print(unit.name,"healed to",unit.hp,"with Elixir")
+        if item.use():
+            return -1
         return True
     else:
         #invalid item for usage

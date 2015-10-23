@@ -474,7 +474,8 @@ while running:
             if i == "cancel":
                 userwants = False
         if userwants:
-            use(i,a)
+            if use(i,a) == -1:
+                a.items.remove(i) #removes users item
     #----------------TERRAIN-----------------#
     elif comm.upper() == "TERRAIN":
         u = askUser("Pick unit to view terrain of: ",allies+enemies,player,"units")
