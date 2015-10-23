@@ -82,13 +82,6 @@ while running:
         stat_map = copy.deepcopy(reg_map) #static map - never changes
         chapter = 0 #chapter we're on
         turn = 1
-        #creating franny
-        franny = Cavalier("Franny",22,6,9,9,5,5,3,8,[copy.deepcopy(iron_lance),copy.deepcopy(iron_sword),copy.deepcopy(vulnerary)],[85,35,55,55,40,35,25])
-        franny.level = 3
-        franny.sym = "F"
-        franny.x = 3
-        franny.y = 7
-        #allies.append(franny)
         #creating You Zhou
         yoyo = Lord("Yoyo",18,5,7,5,7,4,4,5,[copy.deepcopy(rapier),copy.deepcopy(fire),copy.deepcopy(vulnerary)],[60,40,65,40,70,20,45])
         yoyo.sym = "Y"
@@ -135,6 +128,19 @@ while running:
         reg_map = copy.deepcopy(lvl1map)
         stat_map = copy.deepcopy(lvl1map)
         all_allies = allies #sets all allies that should be here this chapter
+    if chapter == 1 and start:
+        for a in allies:
+            a.hp = a.maxhp
+        allies = all_allies
+        #creating franny
+        franny = Cavalier("Franny",22,6,9,9,5,5,3,8,[copy.deepcopy(iron_lance),copy.deepcopy(iron_sword),copy.deepcopy(vulnerary)],[85,35,55,55,40,35,25])
+        franny.level = 3
+        franny.sym = "F"
+        franny.x = 3
+        franny.y = 7
+        allies.append(franny)
+        chapter1Story(player.name)
+        #incomplete
     for a in allies:
         reg_map[len(reg_map)-1-a.y][a.x] = a.sym
     for e in enemies:
