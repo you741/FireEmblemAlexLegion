@@ -290,7 +290,7 @@ while running:
             print("No allies that can move! End your turn if you want them to!")
         if userwants:
             e_sym = [en.sym for en in enemies]
-            move_map = moveDisp(a.x,a.y,a.MOVE+1,a.MOVE+1,copy.deepcopy(reg_map),e_sym,a,all_terr)
+            move_map = moveDisp(a.x,a.y,a.MOVE,a.MOVE,copy.deepcopy(reg_map),e_sym,a,all_terr)
             print("==================LEGEND==================")
             showMap(move_map)
             line = 0
@@ -330,6 +330,7 @@ while running:
                     reg_map[len(reg_map)-a.y-1][a.x] = stat_map[len(reg_map)-a.y-1][a.x] #removes ally symbol from place moved from and reverts to normal as found on static map
                     a.move(xmove,ymove)
                     reg_map[len(reg_map)-a.y-1][a.x] = a.sym
+                    #HANDLE MOUNTED UNITS
                     movers.remove(a) #makes sure each ally can only move once
                     break
     #-------------------ITEM---------------------#
@@ -370,7 +371,7 @@ while running:
             userwants = False
             print("No allies that can trade! End your turn!")
         if userwants:
-            tradable_allies = [al for al in allies if al != a and (abs(a.x - al.x) + abs(a.y - al.y)) <= 1]
+            tradable_allies = [al for al in allies if al != a and (abs(a.x - al.x) + abs(a.y - al.y)) <= 1 and al.CLASS != "Transporter"]
             a2 = askUser("Pick 2nd ally to trade with: ",tradable_allies,player,"allies")
         if not a2:
             print("No allies to trade with",a.name,"!")
@@ -383,12 +384,12 @@ while running:
             while True:
                 fdispitem_a = []
                 fdispitem_a2 = []
-                for i in range(5):
+                for i in range(a.maxspace):
                     if len(a.items) > i:
                         fdispitem_a.append(a.items[i])
                     else:
                         fdispitem_a.append(Item("No item",0))
-                for i in range(5):
+                for i in range(a.maxspace):
                     if len(a2.items) > i:
                         fdispitem_a2.append(a2.items[i])
                     else:
@@ -482,6 +483,8 @@ while running:
         if userwants:
             if use(i,a) == -1:
                 a.items.remove(i) #removes users item
+            attackers.remove(a)
+            print(a.name,"cannot perform an action until you end your turn!")
     #----------------TERRAIN-----------------#
     elif comm.upper() == "TERRAIN":
         u = askUser("Pick unit to view terrain of: ",allies+enemies,player,"units")
@@ -520,7 +523,7 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
             print(e.name,"has started")
             canEnAttack = False #can enemy attack?
             allies_sym = [a.sym for a in allies]
-            e_movemap = moveDisp(e.x,e.y,e.MOVE+1,e.MOVE+1,copy.deepcopy(reg_map),allies_sym,e,all_terr)
+            e_movemap = moveDisp(e.x,e.y,e.MOVE,e.MOVE,copy.deepcopy(reg_map),allies_sym,e,all_terr)
             moveable = [] #enemies movable squares
             attackableAllies = [] #attackable Allies
             for y in range(len(e_movemap)):

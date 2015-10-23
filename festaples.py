@@ -26,13 +26,20 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
     #displays movement for specific units
     ym = len(grid) - 1 - y #y position on map
     curr_spot = grid[ym][x] #current spot on map
-    if move <= 0:
+    if move < 0:
         return grid                #special terrain handling
     elif curr_spot in enemies or (ally.mounted and curr_spot == "^") or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "山"):
         #checks if space modified is occupied or insurpassable
         return grid                 
     elif curr_spot in [".","|","^","-","山"]:
     #recursive function - passable and standable
+        for t in all_terr:
+            if curr_spot == t.sym:
+                if move-t.hind >= 0 and not ally.flying:
+                    move -= t.hind
+                    break#reduces movement by hindrance
+                elif move-t.hind < 0 and not ally.flying:
+                    return grid
         grid[ym][x] = str(maxmove-move)
     elif curr_spot in [str(i) for i in range(1,10)]:
         #marked square, will replace if smaller
@@ -42,11 +49,7 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
         pass
     else:
         return grid
-    for t in all_terr:
-        if curr_spot == t.sym:
-            if move-t.hind > 0 and not ally.flying:
-                move -= t.hind
-                break#reduces movement by hindrance
+    
     if not ym-1 < 0:
             grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,ally,all_terr)
     if not ym+1 >= len(grid):

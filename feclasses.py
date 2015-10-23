@@ -64,6 +64,7 @@ class Person:
         self.mountainous = False
         self.waterproof = False
         self.magical = False
+        self.maxspace = 5 #maximum item space: default is 5
     def losehp(self,damage):
         damage_t = damage
         if damage_t < 0:
@@ -157,7 +158,7 @@ class Person:
             promoted.wskl = self.wskl
         return promoted
     def add_item(self,item,err=True):
-        if len(self.items) >= 5:
+        if len(self.items) >= self.maxspace
             if err:
                 print(self.name,'has a full inventory')
             return 0
@@ -264,7 +265,7 @@ class Murderer(Person):
     def attack(self,enemy,terr=0,terr_def=0):
         if not self.canAttack:
             return False
-        if not self.alive:
+        if not self.alive or not enemy.alive:
             return False
         distx = abs(enemy.x - self.x)
         disty = abs(enemy.y - self.y)
@@ -400,9 +401,10 @@ class Cavalier(Murderer):
     def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
         super(Cavalier,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
         self.CLASS = "Cavalier"
-        self.mounted = True
-        self.promoteC = "Paladin"
         self.MOVE = 7
+        self.mounted = True
+        self.movesLeft = self.MOVE
+        self.promoteC = "Paladin"
         self.wskl["Lance"] = 200
         self.wskl["Sword"] = 100
 #-----------BRIGAND----------#
@@ -412,3 +414,23 @@ class Brigand(Murderer):
         self.CLASS = "Brigand"
         self.mountainous = True
         self.wskl["Axe"] = 200
+#--------TRANSPORTER---------#
+class Transporter(Person):
+    def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+        self.mounted = True
+        self.convoy = []
+    def transfer(self,item,take=False):
+        if not take:
+            if item not in self.convoy:
+                print(self.name,"does not have this item in supply!")
+                return False
+            else:
+                self.convoy.remove(item)
+                return item
+        else:
+            if len(self.convoy) < 100:
+                self.convoy.append(item)
+                return True
+            else:
+                print(self.name,"'s storage is full!")
+                return False
