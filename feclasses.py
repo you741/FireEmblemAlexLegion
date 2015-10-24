@@ -22,6 +22,7 @@
 from random import randint
 from festaples import *
 from feweapons import *
+import time
 #parent of all units - Person
 weaponTriangle = [("Sword","Axe"),("Axe","Lance"),("Lance","Sword"),("Anima","Light"),("Dark","Anima"),("Light","Dark")]
 #^list full of wt advantages (adv,disadv)
@@ -39,6 +40,7 @@ class Person:
         self.luck = lck
         self.resistance = res
         self.constitution = con
+        self.equip = Weapon("No weapon",0,0,0,0,"",0)
         self.mounted = False #is unit mounted?
         self.alive = True #is unit alive?
         self.wskl = {"Sword":0,"Lance":0,"Axe":0,"Bow":0,
@@ -64,6 +66,11 @@ class Person:
         self.mountainous = False
         self.waterproof = False
         self.magical = False
+        self.maxspace = 5 #maximum item space: default is 5
+        self.promoted = False #is unit promoted?
+        self.deathQuote = ""
+        self.fightQuote = ""
+        self.attacked = False
     def losehp(self,damage):
         damage_t = damage
         if damage_t < 0:
@@ -94,15 +101,6 @@ class Person:
         print("Resistance:",self.resistance)
         print("Constitution:",self.constitution)
         print("Equipped weapon:",self.equip.name)
-        extrng = ""
-        if not self.equip.rnge == self.equip.maxrnge:
-            extrng = "- "+str(self.equip.maxrnge)
-        print("Range:",self.equip.rnge,extrng)
-        print("Experience:",self.exp,"/100")
-        rankL = ["F","E","D","C","B","A","S"]
-        for k,t in enumerate(self.wskl):
-            if self.wskl[t] >= 100:
-                print(t,rankL[self.wskl[t]//100])
     def levelUp(self):
         if self.canLevel:            
             self.level += 1
@@ -128,6 +126,7 @@ class Person:
                 if i == 3 and self.growths[i] > random_number:
                     if not self.speed >= self.caps[i]:
                         self.speed += 1
+                        self.attackspeed += 1
                         print("Speed increased to",self.speed)
                 if i == 4 and self.growths[i] > random_number:
                     if not self.luck >= self.caps[i]:
@@ -143,9 +142,11 @@ class Person:
                         print("Resistance increased to",self.resistance)
     def gainExp(self,amount=1):
         if self.canLevel:
-            self.exp += amount
+            if self.promoted:
+                amount = amount//2
             if amount > 100:
                 amount = 100
+            self.exp += amount
             print(self.name,"gained",amount,"experience")
             if self.exp >= 100:
                 self.exp -= 100
@@ -157,7 +158,7 @@ class Person:
             promoted.wskl = self.wskl
         return promoted
     def add_item(self,item,err=True):
-        if len(self.items) >= 5:
+        if len(self.items) >= self.maxspace:
             if err:
                 print(self.name,'has a full inventory')
             return 0
@@ -171,12 +172,14 @@ class Person:
     def remove_item(self,item,err=True):
         if len(self.items) > 0:
             self.items.remove(item)
-            print(self.name,"removed",item.name)
+            if err:
+                print(self.name,"removed",item.name)
             if type(item) == Weapon:
                 self.weapons.remove(item)
             return True
         else:
-            print("No items to remove")
+            if err:
+                print("No items to remove")
             return False
             
     def show_items(self,detailed=True):
@@ -192,6 +195,10 @@ class Person:
         self.y = y
         print("Moved ",self.name," to (",x,",",y,")",sep = "")
         return True
+    def calculate(self,enemy,terr=0,terr_def=0,unreal=True,stats=False):
+        #persons can't attack
+        if not self.canAttack:
+            print(self.name,"can't attack!")
     
 #Murderer Class is basis for all fighting classes
 class Murderer(Person):
@@ -264,11 +271,18 @@ class Murderer(Person):
     def attack(self,enemy,terr=0,terr_def=0):
         if not self.canAttack:
             return False
-        if not self.alive:
+        if not self.alive or not enemy.alive:
             return False
         distx = abs(enemy.x - self.x)
         disty = abs(enemy.y - self.y)
         dist = distx + disty
+        if not self.attacked and self.fightQuote != "":
+            time.sleep(1)
+            print(self.name,self.fightQuote,sep=": ")
+        self.attacked = True
+        if not enemy.attacked and enemy.fightQuote != "":
+            time.sleep(1)
+            print(enemy.name,enemy.fightQuote,sep=": ")
         #distance of enemy to ally
         if not self.equip.rnge <= dist <= self.equip.maxrnge:
             #will not attack if not in range
@@ -292,15 +306,19 @@ class Murderer(Person):
             self.strength += exdam - terr_def
             damage = self.equip.damage(self,enemy) #damage done to enemy
             self.strength -= exdam - terr_def
-            expgain = damage-self.level #increasing exp
+            expgain = damage-self.level+enemy.level #increasing exp
             if expgain > 30:
                 expgain = 30 #caps exp gain at 30
             elif expgain <= 0:
                 expgain = 1 #caps exp gain at 1
+            if enemy.promoted:
+                expgain += 20
             print(self.name,"attacked",enemy.name,"with",self.equip.name,"for",damage,"damage") #prints damage
             enemy.losehp(damage)#enemy loses hp
             if enemy.hp <= 0:
-                print(enemy.name,"died") #if enemy dies it will print
+                print(enemy.name,enemy.deathQuote,sep=": ")
+                time.sleep(1)
+                print(enemy.name,"died")#if enemy dies it will print
                 expgain += enemy.gift - self.level #adds more exp when en dies
             self.gainExp(expgain) #increasing exp
             self.w_experience(self.equip.wexp,self.equip.typ) #increasing wexp
@@ -363,6 +381,17 @@ class Murderer(Person):
         self.wskl[typ] += wexp_g
         if self.wskl[typ] > 600:
             self.wskl[typ] = 600
+    def display(self):
+        super(Murderer,self).display()
+        extrng = ""
+        if not self.equip.rnge == self.equip.maxrnge:
+            extrng = "- "+str(self.equip.maxrnge)
+        print("Range:",self.equip.rnge,extrng)
+        print("Experience:",self.exp,"/100")
+        rankL = ["F","E","D","C","B","A","S"]
+        for k,t in enumerate(self.wskl):
+            if self.wskl[t] >= 100:
+                print(t,rankL[self.wskl[t]//100])
 #-----------LORD-------------#
 class Lord(Murderer):
     def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
@@ -400,11 +429,19 @@ class Cavalier(Murderer):
     def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
         super(Cavalier,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
         self.CLASS = "Cavalier"
-        self.mounted = True
-        self.promoteC = "Paladin"
         self.MOVE = 7
+        self.mounted = True
+        self.movesLeft = self.MOVE
+        self.promoteC = "Paladin"
         self.wskl["Lance"] = 200
         self.wskl["Sword"] = 100
+#---------FIGHTER-----------#
+class Fighter(Murderer):
+    def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+        super(Fighter,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
+        self.CLASS = "Fighter"
+        self.MOVE = 5
+        self.wskl["Axe"] = 200
 #-----------BRIGAND----------#
 class Brigand(Murderer):
      def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
@@ -412,3 +449,38 @@ class Brigand(Murderer):
         self.CLASS = "Brigand"
         self.mountainous = True
         self.wskl["Axe"] = 200
+#--------TRANSPORTER---------#
+class Transporter(Person):
+    def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+        super(Transporter,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
+        self.mounted = True
+        self.convoy = []
+        self.CLASS = "Transporter"
+    def transfer(self,item,take=False):
+        if not take:
+            if item not in self.convoy:
+                print(self.name,"does not have this item in supply!")
+                return False
+            else:
+                self.convoy.remove(item)
+                return item
+        else:
+            if len(self.convoy) < 100:
+                self.convoy.append(item)
+                return True
+            else:
+                print(self.name,"'s storage is full!")
+                return False
+    def convoyLen(self):
+        return len(self.convoy)
+#----------PALADIN---------------#
+class Paladin(Cavalier):
+    def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+        super(Paladin,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
+        self.CLASS = "Paladin"
+        self.MOVE = 8
+        self.movesLeft = self.MOVE
+        self.wskl["Lance"] = 500
+        self.wskl["Sword"] = 500
+        self.wskl["Axe"] = 100
+        self.promoted = True
