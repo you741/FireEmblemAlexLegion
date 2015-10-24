@@ -67,10 +67,13 @@ class Person:
         self.waterproof = False
         self.magical = False
         self.maxspace = 5 #maximum item space: default is 5
+<<<<<<< HEAD
         self.promoted = False #is unit promoted?
         self.deathQuote = ""
         self.fightQuote = ""
         self.attacked = False
+=======
+>>>>>>> origin/master
     def losehp(self,damage):
         damage_t = damage
         if damage_t < 0:
@@ -158,7 +161,11 @@ class Person:
             promoted.wskl = self.wskl
         return promoted
     def add_item(self,item,err=True):
+<<<<<<< HEAD
         if len(self.items) >= self.maxspace:
+=======
+        if len(self.items) >= self.maxspace
+>>>>>>> origin/master
             if err:
                 print(self.name,'has a full inventory')
             return 0
@@ -452,10 +459,15 @@ class Brigand(Murderer):
 #--------TRANSPORTER---------#
 class Transporter(Person):
     def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+<<<<<<< HEAD
         super(Transporter,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
         self.mounted = True
         self.convoy = []
         self.CLASS = "Transporter"
+=======
+        self.mounted = True
+        self.convoy = []
+>>>>>>> origin/master
     def transfer(self,item,take=False):
         if not take:
             if item not in self.convoy:
@@ -471,6 +483,7 @@ class Transporter(Person):
             else:
                 print(self.name,"'s storage is full!")
                 return False
+<<<<<<< HEAD
     def convoyLen(self):
         return len(self.convoy)
 #----------PALADIN---------------#
@@ -484,3 +497,5 @@ class Paladin(Cavalier):
         self.wskl["Sword"] = 500
         self.wskl["Axe"] = 100
         self.promoted = True
+=======
+>>>>>>> origin/master

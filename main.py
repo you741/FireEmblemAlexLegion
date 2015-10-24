@@ -356,10 +356,14 @@ while running:
             print("No allies that can move! End your turn if you want them to!")
         if userwants:
             e_sym = [en.sym for en in enemies]
+<<<<<<< HEAD
             movement = a.MOVE
             if a.mounted:
                 movement = a.movesLeft
             move_map = moveDisp(a.x,a.y,movement,movement,copy.deepcopy(reg_map),e_sym,a,all_terr)
+=======
+            move_map = moveDisp(a.x,a.y,a.MOVE,a.MOVE,copy.deepcopy(reg_map),e_sym,a,all_terr)
+>>>>>>> origin/master
             print("==================LEGEND==================")
             showMap(move_map)
             line = 0
@@ -400,6 +404,7 @@ while running:
                     a.move(xmove,ymove)
                     reg_map[len(reg_map)-a.y-1][a.x] = a.sym
                     #HANDLE MOUNTED UNITS
+<<<<<<< HEAD
                     if not a.mounted:
                         movers.remove(a) #makes sure each ally can only move once
                     else:
@@ -408,6 +413,9 @@ while running:
                             a.movesLeft = 0
                         if a.movesLeft == 0:
                             movers.remove(a)
+=======
+                    movers.remove(a) #makes sure each ally can only move once
+>>>>>>> origin/master
                     break
     #-------------------ITEM---------------------#
     elif comm.upper() == "ITEM":
@@ -552,7 +560,11 @@ while running:
                 userwants = False
         if userwants:
             if use(i,a) == -1:
+<<<<<<< HEAD
                 a.remove_item(i,False) #removes users item
+=======
+                a.items.remove(i) #removes users item
+>>>>>>> origin/master
             attackers.remove(a)
             print(a.name,"cannot perform an action until you end your turn!")
     #----------------TERRAIN-----------------#

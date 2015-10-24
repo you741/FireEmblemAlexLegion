@@ -45,6 +45,13 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
         #marked square, will replace if smaller
         if int(curr_spot) > maxmove-move+1:
             grid[ym][x] = str(maxmove-move)
+<<<<<<< HEAD
+=======
+    elif not move == 1:
+        pass
+    else:
+        return grid
+>>>>>>> origin/master
     
     if not ym-1 < 0:
             grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,ally,all_terr)
