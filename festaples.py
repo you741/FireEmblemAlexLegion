@@ -9,7 +9,7 @@ import copy
 #map legend:                                                    #
 # + = attackable/healable square with current weapon/staff      #
 # 1-9 and # = Moveable square                                   #
-# . = field | = forest ^ = hill 山 = mountain                   #
+# . = field | = forest ^ = hill & = mountain                   #
 # e = Enemy E = enemy you can attack                            #
 # b = Boss B = boss you can attack                              #
 # = = wall - = water * = fog                                    #
@@ -17,7 +17,7 @@ import copy
 #===============================================================#
 plain = Terrain("Plain",".")
 forest = Terrain("Forest","|",20,1,1)
-mountain = Terrain("Mountain","山",40,2,4)
+mountain = Terrain("Mountain","&",40,2,4)
 hill = Terrain("Hill","^",40,2,4)
 water = Terrain("Water","-",10,0,4)
 wall = Terrain("Wall","=",0,0,0)
@@ -26,27 +26,26 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
     #displays movement for specific units
     ym = len(grid) - 1 - y #y position on map
     curr_spot = grid[ym][x] #current spot on map
-    if move <= 0:
+    if move < 0:
         return grid                #special terrain handling
-    elif curr_spot in enemies or (ally.mounted and curr_spot == "^") or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "山"):
+    elif curr_spot in enemies or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "&"):
         #checks if space modified is occupied or insurpassable
         return grid                 
-    elif curr_spot in [".","|","^","-","山"]:
+    elif curr_spot in [".","|","^","-","&"]:
     #recursive function - passable and standable
+        for t in all_terr:
+            if curr_spot == t.sym:
+                if move-t.hind >= 0 and not ally.flying:
+                    move -= t.hind
+                    break#reduces movement by hindrance
+                elif move-t.hind < 0 and not ally.flying:
+                    return grid
         grid[ym][x] = str(maxmove-move)
     elif curr_spot in [str(i) for i in range(1,10)]:
         #marked square, will replace if smaller
         if int(curr_spot) > maxmove-move+1:
             grid[ym][x] = str(maxmove-move)
-    elif not move == 1:
-        pass
-    else:
-        return grid
-    for t in all_terr:
-        if curr_spot == t.sym:
-            if move-t.hind > 0 and not ally.flying:
-                move -= t.hind
-                break#reduces movement by hindrance
+    
     if not ym-1 < 0:
             grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,ally,all_terr)
     if not ym+1 >= len(grid):
@@ -104,7 +103,13 @@ def askUser(ques,li,player,obj="units",nodisplayer=False,attr=""):
                 asking = False
                 break
         if unit.lower() == "info":
-            attr = "display" #displays more info upon user entering info
+            for u in li:
+                isplayer = "(enter 'me', not this name)" if u == player else ""
+                if attr == "display":
+                    print(u.display(),isplayer)
+                    print("----------------------")
+                else:
+                    print(u.name,isplayer) #displays more info upon user entering info
         else:
             print("Invalid",obj)
     
@@ -139,8 +144,10 @@ def enemyAI(enemy,allies,movable,terr_map,c=0,cna=True):
                           "Lance":"Sword",
                           "Anima":"Light",
                           "Light":"Dark",
-                          "Dark":"Anima"}
+                          "Dark":"Anima",
+                          "":"adfhaoijfaowiehf"}
     canAllAtk = cna #can all allies attack the enemy?
+    ally_cant = cna #can individual ally attack the enemy?
     best = [] #best allies to attack - try to reduce to one
     best = [(-1,-1,999999,999999,0,0,0,0)]
     for a in allies:
@@ -188,11 +195,13 @@ def enemyAI(enemy,allies,movable,terr_map,c=0,cna=True):
                 a_en = a.calculate(en,eter_avo,eter_def,False,True)
                 if a_en != False and not canAllAtk:
                     continue #will not attack ally if another ally can't fight back
+                if not a_en:
+                    a_en = (0,0,0)
+                    ally_cant = True
                 comparer = (round(100*en_a[0]/a.hp),en_a[1],round(100*a_en[0]/en.hp),a_en[1],a,x,y,enemy.weapons.index(w)) #stats to compare
                 comparison = comparer[c] > best[0][c] if c in [0,1] else comparer[c] < best[0][c]
-                if not a_en and canAllAtk:
+                if ally_cant and canAllAtk:
                     #if an ally cannot attack
-                    a_en = (0,0,0)
                     canAllAtk = False
                     best = [comparer]
                     continue
