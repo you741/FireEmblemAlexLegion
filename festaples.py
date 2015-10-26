@@ -28,7 +28,11 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
     curr_spot = grid[ym][x] #current spot on map
     if move < 0:
         return grid                #special terrain handling
+<<<<<<< HEAD
     elif curr_spot in enemies or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "&"):
+=======
+    elif curr_spot in enemies or (ally.mounted and curr_spot == "^") or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "&"):
+>>>>>>> origin/master
         #checks if space modified is occupied or insurpassable
         return grid                 
     elif curr_spot in [".","|","^","-","&"]:
@@ -45,6 +49,16 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
         #marked square, will replace if smaller
         if int(curr_spot) > maxmove-move+1:
             grid[ym][x] = str(maxmove-move)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+    elif not move == 1:
+        pass
+    else:
+        return grid
+>>>>>>> origin/master
+>>>>>>> origin/master
     
     if not ym-1 < 0:
             grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,ally,all_terr)

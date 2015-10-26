@@ -69,10 +69,19 @@ class Person:
         self.waterproof = False
         self.magical = False
         self.maxspace = 5 #maximum item space: default is 5
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/master
         self.promoted = False #is unit promoted?
         self.deathQuote = ""
         self.fightQuote = ""
         self.attacked = False
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> origin/master
+>>>>>>> origin/master
     def losehp(self,damage):
         damage_t = damage
         if damage_t < 0:
@@ -160,7 +169,15 @@ class Person:
             promoted.wskl = self.wskl
         return promoted
     def add_item(self,item,err=True):
+<<<<<<< HEAD
         if len(self.items) >= self.maxspace:
+=======
+<<<<<<< HEAD
+        if len(self.items) >= self.maxspace:
+=======
+        if len(self.items) >= self.maxspace
+>>>>>>> origin/master
+>>>>>>> origin/master
             if err:
                 print(self.name,'has a full inventory')
             return 0
@@ -207,6 +224,7 @@ class Person:
     def calculate(self,enemy,terr=0,terr_def=0,unreal=True,stats=False):
         #persons can't attack
         if not self.canAttack:
+<<<<<<< HEAD
             if not stats:
                 print(self.name,"can't attack!")
             return False
@@ -214,6 +232,9 @@ class Person:
         #persons can't attack
         print(self.name,"can't fight back!")
         return False
+=======
+            print(self.name,"can't attack!")
+>>>>>>> origin/master
     
 #Murderer Class is basis for all fighting classes
 class Murderer(Person):
@@ -304,7 +325,10 @@ class Murderer(Person):
         if not enemy.attacked and enemy.fightQuote != "":
             time.sleep(1)
             print(enemy.name,enemy.fightQuote,sep=": ")
+<<<<<<< HEAD
         enemy.attacked = True
+=======
+>>>>>>> origin/master
         #distance of enemy to ally
         if not self.equip.rnge <= dist <= self.equip.maxrnge:
             #will not attack if not in range
@@ -338,8 +362,12 @@ class Murderer(Person):
             print(self.name,"attacked",enemy.name,"with",self.equip.name,"for",damage,"damage") #prints damage
             enemy.losehp(damage)#enemy loses hp
             if enemy.hp <= 0:
+<<<<<<< HEAD
                 if enemy.deathQuote != "":
                     print(enemy.name,enemy.deathQuote,sep=": ")
+=======
+                print(enemy.name,enemy.deathQuote,sep=": ")
+>>>>>>> origin/master
                 time.sleep(1)
                 print(enemy.name,"died")#if enemy dies it will print
                 expgain += enemy.gift - self.level #adds more exp when en dies
@@ -475,10 +503,21 @@ class Brigand(Murderer):
 #--------TRANSPORTER---------#
 class Transporter(Person):
     def __init__(self,name,hp,stren,skl,spd,lck,defen,res=0,con=5,items=[],growths=[50,50,50,50,50,50,50]):
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/master
         super(Transporter,self).__init__(name,hp,stren,skl,spd,lck,defen,res,con,items,growths)
         self.mounted = True
         self.convoy = []
         self.CLASS = "Transporter"
+<<<<<<< HEAD
+=======
+=======
+        self.mounted = True
+        self.convoy = []
+>>>>>>> origin/master
+>>>>>>> origin/master
     def transfer(self,item,take=False):
         if not take:
             if item not in self.convoy:
@@ -494,6 +533,10 @@ class Transporter(Person):
             else:
                 print(self.name,"'s storage is full!")
                 return False
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/master
     def convoyLen(self):
         return len(self.convoy)
 #----------PALADIN---------------#
@@ -507,3 +550,8 @@ class Paladin(Cavalier):
         self.wskl["Sword"] = 500
         self.wskl["Axe"] = 100
         self.promoted = True
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> origin/master
+>>>>>>> origin/master

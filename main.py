@@ -195,6 +195,7 @@ while running:
         enemy1.sym = "E"
         enemy1.x = 10
         enemy1.y = 5
+<<<<<<< HEAD
         enemy1.gift = 50
         enemy1.canLevel = False
         enemies.append(enemy1)
@@ -210,6 +211,9 @@ while running:
             enemy_clone.name = "Bandit "+str(name_n)
             name_n += 1
             enemies.append(enemy_clone)
+=======
+        enemies.append(enemy1)
+>>>>>>> origin/master
         reg_map = copy.deepcopy(lvl2map)
         stat_map = copy.deepcopy(lvl2map)
         movers = [u for u in allies]
@@ -370,10 +374,20 @@ while running:
             print("No allies that can move! End your turn if you want them to!")
         if userwants:
             e_sym = [en.sym for en in enemies]
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/master
             movement = a.MOVE
             if a.mounted:
                 movement = a.movesLeft
             move_map = moveDisp(a.x,a.y,movement,movement,copy.deepcopy(reg_map),e_sym,a,all_terr)
+<<<<<<< HEAD
+=======
+=======
+            move_map = moveDisp(a.x,a.y,a.MOVE,a.MOVE,copy.deepcopy(reg_map),e_sym,a,all_terr)
+>>>>>>> origin/master
+>>>>>>> origin/master
             print("==================LEGEND==================")
             showMap(move_map)
             line = 0
@@ -414,6 +428,10 @@ while running:
                     a.move(xmove,ymove)
                     reg_map[len(reg_map)-a.y-1][a.x] = a.sym
                     #HANDLE MOUNTED UNITS
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/master
                     if not a.mounted:
                         movers.remove(a) #makes sure each ally can only move once
                     else:
@@ -422,6 +440,12 @@ while running:
                             a.movesLeft = 0
                         if a.movesLeft == 0:
                             movers.remove(a)
+<<<<<<< HEAD
+=======
+=======
+                    movers.remove(a) #makes sure each ally can only move once
+>>>>>>> origin/master
+>>>>>>> origin/master
                     break
     #-------------------ITEM---------------------#
     elif comm.upper() == "ITEM":
@@ -566,7 +590,15 @@ while running:
                 userwants = False
         if userwants:
             if use(i,a) == -1:
+<<<<<<< HEAD
                 a.remove_item(i,False) #removes users item
+=======
+<<<<<<< HEAD
+                a.remove_item(i,False) #removes users item
+=======
+                a.items.remove(i) #removes users item
+>>>>>>> origin/master
+>>>>>>> origin/master
             attackers.remove(a)
             print(a.name,"cannot perform an action until you end your turn!")
     #----------------TERRAIN-----------------#
