@@ -28,7 +28,15 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
     curr_spot = grid[ym][x] #current spot on map
     if move < 0:
         return grid                #special terrain handling
+<<<<<<< HEAD
     elif curr_spot in enemies or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "&"):
+=======
+<<<<<<< HEAD
+    elif curr_spot in enemies or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "&"):
+=======
+    elif curr_spot in enemies or (ally.mounted and curr_spot == "^") or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "&"):
+>>>>>>> origin/master
+>>>>>>> origin/master
         #checks if space modified is occupied or insurpassable
         return grid                 
     elif curr_spot in [".","|","^","-","&"]:
@@ -45,6 +53,19 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
         #marked square, will replace if smaller
         if int(curr_spot) > maxmove-move+1:
             grid[ym][x] = str(maxmove-move)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+    elif not move == 1:
+        pass
+    else:
+        return grid
+>>>>>>> origin/master
+>>>>>>> origin/master
+>>>>>>> origin/master
     
     if not ym-1 < 0:
             grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,ally,all_terr)
@@ -107,6 +128,7 @@ def askUser(ques,li,player,obj="units",nodisplayer=False,attr=""):
                 return li[u]
                 asking = False
                 break
+<<<<<<< HEAD
         if unit == "info":
             for u in li:
                 #isplayer = "(enter 'me', not this name)" if u == player else ""
@@ -114,6 +136,18 @@ def askUser(ques,li,player,obj="units",nodisplayer=False,attr=""):
                 print("----------------------")
             else:
                 print("Invalid",obj)
+=======
+        if unit.lower() == "info":
+            for u in li:
+                isplayer = "(enter 'me', not this name)" if u == player else ""
+                if attr == "display":
+                    print(u.display(),isplayer)
+                    print("----------------------")
+                else:
+                    print(u.name,isplayer) #displays more info upon user entering info
+        else:
+            print("Invalid",obj)
+>>>>>>> origin/master
     
 #uses an item
 def use(item,unit):

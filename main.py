@@ -44,7 +44,11 @@ while askingclass:
         player = Knight(name,21,7,4,4,3,7,1,10,[copy.deepcopy(iron_lance)],[80,55,40,30,30,60,15])
         askingclass = False
     if playerclass.lower() == "myrmidon":
+<<<<<<< HEAD
         player = Myrmidon(name,20,5,7,7,5,3,2,5,[copy.deepcopy(slim_sword)],[70,40,60,60,45,20,20])
+=======
+        player = Myrmidon(name,20,5,7,7,4,3,2,5,[copy.deepcopy(slim_sword)],[70,40,60,60,45,20,20])
+>>>>>>> origin/master
         askingclass = False
     if playerclass.lower() == "info":
         print("""Mage - A speedy and accurate user of anima magic. Can't really take physical hits, although magical defense is high. Melts enemies with low resistance.
@@ -120,7 +124,10 @@ while running:
         #creates boss
         boss = Brigand("Bandit 1",28,8,4,4,0,5,1,8,[copy.deepcopy(iron_axe)])
         boss.fightQuote = "I serve the mighty Alex Legion! You won't stop me!\nYoyo: You will pay for your iniquities!"
+<<<<<<< HEAD
         boss.deathQuote = "Ugh... How could I die... to a pampered lord..ling..."
+=======
+>>>>>>> origin/master
         boss.name = "Alex the Bandit"
         boss.canLevel = False
         boss.canMove = False
@@ -197,6 +204,7 @@ while running:
         enemy1.sym = "E"
         enemy1.x = 10
         enemy1.y = 5
+<<<<<<< HEAD
         enemy1.gift = 50
         enemy1.canLevel = False
         enemies.append(enemy1)
@@ -213,6 +221,27 @@ while running:
             enemy_clone.name = "Bandit "+str(name_n)
             name_n += 1
             enemies.append(enemy_clone)
+=======
+<<<<<<< HEAD
+        enemy1.gift = 50
+        enemy1.canLevel = False
+        enemies.append(enemy1)
+        #creating 24 clones
+        clone_loc = [(11,5),(11,6),(11,7),(10,6),(10,7),(15,8),(15,9),(14,9),
+                     (15,10),(15,8),(15,7),(8,14),(8,13),(5,14),(13,13),(12,13),
+                     (0,0),(0,1),(0,3),(0,4),(0,5),(10,10),(19,5),(19,6),(19,7)]
+        name_n = 2
+        for x,y in clone_loc:
+            enemy_clone = copy.deepcopy(enemy1)
+            enemy_clone.x = x
+            enemy_clone.y = y
+            enemy_clone.name = "Bandit "+str(name_n)
+            name_n += 1
+            enemies.append(enemy_clone)
+=======
+        enemies.append(enemy1)
+>>>>>>> origin/master
+>>>>>>> origin/master
         reg_map = copy.deepcopy(lvl2map)
         stat_map = copy.deepcopy(lvl2map)
         movers = [u for u in allies]
@@ -387,10 +416,26 @@ while running:
             print("No allies that can move! End your turn if you want them to!")
         if userwants:
             e_sym = [en.sym for en in enemies]
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/master
+>>>>>>> origin/master
             movement = a.MOVE
             if a.mounted:
                 movement = a.movesLeft
             move_map = moveDisp(a.x,a.y,movement,movement,copy.deepcopy(reg_map),e_sym,a,all_terr)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+            move_map = moveDisp(a.x,a.y,a.MOVE,a.MOVE,copy.deepcopy(reg_map),e_sym,a,all_terr)
+>>>>>>> origin/master
+>>>>>>> origin/master
+>>>>>>> origin/master
             print("==================LEGEND==================")
             showMap(move_map)
             line = 0
@@ -431,6 +476,13 @@ while running:
                     a.move(xmove,ymove)
                     reg_map[len(reg_map)-a.y-1][a.x] = a.sym
                     #HANDLE MOUNTED UNITS
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/master
+>>>>>>> origin/master
                     if not a.mounted:
                         movers.remove(a) #makes sure each ally can only move once
                     else:
@@ -439,6 +491,15 @@ while running:
                             a.movesLeft = 0
                         if a.movesLeft == 0:
                             movers.remove(a)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+                    movers.remove(a) #makes sure each ally can only move once
+>>>>>>> origin/master
+>>>>>>> origin/master
+>>>>>>> origin/master
                     break
     #-------------------ITEM---------------------#
     elif comm.upper() == "ITEM":
@@ -583,6 +644,7 @@ while running:
                 userwants = False
         if userwants:
             if use(i,a) == -1:
+<<<<<<< HEAD
                 a.remove_item(i,False) #removes users item
             attackers.remove(a)
             print(a.name,"cannot perform an action until you end your turn!")
@@ -657,6 +719,19 @@ while running:
         else:
             if userwants:
                 print("Sorry,",a.name,"is not adjacent to Henning, so,",a.name,"cannot transfer items")
+=======
+<<<<<<< HEAD
+                a.remove_item(i,False) #removes users item
+=======
+<<<<<<< HEAD
+                a.remove_item(i,False) #removes users item
+=======
+                a.items.remove(i) #removes users item
+>>>>>>> origin/master
+>>>>>>> origin/master
+            attackers.remove(a)
+            print(a.name,"cannot perform an action until you end your turn!")
+>>>>>>> origin/master
     #----------------TERRAIN-----------------#
     elif comm.upper() == "TERRAIN":
         u = askUser("Pick unit to view terrain of: ",allies+enemies,player,"units")
@@ -697,11 +772,15 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
             canEnAttack = False #can enemy attack?
             allies_sym = [a.sym for a in allies]
             e_movemap = moveDisp(e.x,e.y,e.MOVE,e.MOVE,copy.deepcopy(reg_map),allies_sym,e,all_terr)
+<<<<<<< HEAD
             moveable = [(e.x,e.y)] #enemies movable squares
+=======
+            moveable = [] #enemies movable squares
+>>>>>>> origin/master
             attackableAllies = [] #attackable Allies
             for y in range(len(e_movemap)):
                 for x in range(len(e_movemap[0])):
-                    if e_movemap[len(e_movemap) - 1 - y][x] in [str(i) for i in range(0,12)]:
+                    if e_movemap[len(e_movemap) - 1 - y][x] in [str(i) for i in range(0,12)]+[e.sym]:
                         moveable.append((x,y))        
                         en = copy.deepcopy(e)
                         en.x = x
@@ -785,8 +864,12 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                     movers.append(a)
                 if a.mounted:
                     a.movesLeft = a.MOVE
+<<<<<<< HEAD
         if not lose:
             print("==============PLAYER PHASE================")
+=======
+        print("==============PLAYER PHASE================")
+>>>>>>> origin/master
     #----------------INVALIDE-------------#
     else:
         print("Invalid command. Type HELP for help.")
