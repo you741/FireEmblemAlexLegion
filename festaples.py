@@ -9,7 +9,7 @@ import copy
 #map legend:                                                    #
 # + = attackable/healable square with current weapon/staff      #
 # 1-9 and # = Moveable square                                   #
-# . = field | = forest ^ = hill & = mountain                   #
+# . = field | = forest ^ = hill & = mountain                    #
 # e = Enemy E = enemy you can attack                            #
 # b = Boss B = boss you can attack                              #
 # = = wall - = water * = fog                                    #
@@ -18,63 +18,43 @@ import copy
 plain = Terrain("Plain",".")
 forest = Terrain("Forest","|",20,1,1)
 mountain = Terrain("Mountain","&",40,2,4)
-hill = Terrain("Hill","^",40,2,4)
+hill = Terrain("Hill","^",30,1,4)
 water = Terrain("Water","-",10,0,4)
 wall = Terrain("Wall","=",0,0,0)
 all_terr = [plain,forest,mountain,hill,water,wall]
-def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr):
+def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr,stat_map):
     #displays movement for specific units
     ym = len(grid) - 1 - y #y position on map
+    map_spot = stat_map[ym][x] #current terrain on map
+    for t in all_terr:
+        if map_spot == t.sym:
+            if move-t.hind >= 0 and not ally.flying:
+                move -= t.hind
+                break#reduces movement by hindrance
+            elif move-t.hind < 0 and not ally.flying:
+                return grid
     curr_spot = grid[ym][x] #current spot on map
     if move < 0:
         return grid                #special terrain handling
-<<<<<<< HEAD
     elif curr_spot in enemies or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "&"):
-=======
-<<<<<<< HEAD
-    elif curr_spot in enemies or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "&"):
-=======
-    elif curr_spot in enemies or (ally.mounted and curr_spot == "^") or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "&"):
->>>>>>> origin/master
->>>>>>> origin/master
         #checks if space modified is occupied or insurpassable
         return grid                 
     elif curr_spot in [".","|","^","-","&"]:
-    #recursive function - passable and standable
-        for t in all_terr:
-            if curr_spot == t.sym:
-                if move-t.hind >= 0 and not ally.flying:
-                    move -= t.hind
-                    break#reduces movement by hindrance
-                elif move-t.hind < 0 and not ally.flying:
-                    return grid
+        #recursive function - passable and standable
         grid[ym][x] = str(maxmove-move)
     elif curr_spot in [str(i) for i in range(1,10)]:
         #marked square, will replace if smaller
-        if int(curr_spot) > maxmove-move+1:
+        if int(curr_spot) > maxmove-move:
             grid[ym][x] = str(maxmove-move)
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-    elif not move == 1:
-        pass
-    else:
-        return grid
->>>>>>> origin/master
->>>>>>> origin/master
->>>>>>> origin/master
     
     if not ym-1 < 0:
-            grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,ally,all_terr)
+            grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,ally,all_terr,stat_map)
     if not ym+1 >= len(grid):
-        grid = moveDisp(x,y-1,move-1,maxmove,grid,enemies,ally,all_terr)
+        grid = moveDisp(x,y-1,move-1,maxmove,grid,enemies,ally,all_terr,stat_map)
     if not x-1 < 0:
-        grid = moveDisp(x-1,y,move-1,maxmove,grid,enemies,ally,all_terr)
+        grid = moveDisp(x-1,y,move-1,maxmove,grid,enemies,ally,all_terr,stat_map)
     if not x+1 >= len(grid[0]):
-        grid = moveDisp(x+1,y,move-1,maxmove,grid,enemies,ally,all_terr)
+        grid = moveDisp(x+1,y,move-1,maxmove,grid,enemies,ally,all_terr,stat_map)
     return grid
 
 def showMap(grid):
@@ -105,15 +85,18 @@ def askUser(ques,li,player,obj="units",nodisplayer=False,attr=""):
             print(un.display())
             print("----------------------")
         else:
-            if type(un) == Item:
-                extext = str(un.dur)+"/"+str(un.maxdur)
+            if type(un) == Item or type(un) == Weapon:
+                if not un.dur == 0:
+                    extext = str(un.dur)+"/"+str(un.maxdur)
+                else:
+                    extext = ""
             else:
                 extext = ""
-            print(u,".",un.name,extext)
+            print(u,". ",un.name," ",extext,sep="")
     print("==========","="*len(obj),"==========",sep="=")
     asking = True
     while asking:
-        unit = input(ques+"(enter number beside "+obj+")")
+        unit = input(ques+"(enter number beside "+obj+"): ")
         if unit.lower() == "cancel":
             print("Cancelled")
             return "cancel"
@@ -128,7 +111,6 @@ def askUser(ques,li,player,obj="units",nodisplayer=False,attr=""):
                 return li[u]
                 asking = False
                 break
-<<<<<<< HEAD
         if unit == "info":
             for u in li:
                 #isplayer = "(enter 'me', not this name)" if u == player else ""
@@ -136,18 +118,6 @@ def askUser(ques,li,player,obj="units",nodisplayer=False,attr=""):
                 print("----------------------")
             else:
                 print("Invalid",obj)
-=======
-        if unit.lower() == "info":
-            for u in li:
-                isplayer = "(enter 'me', not this name)" if u == player else ""
-                if attr == "display":
-                    print(u.display(),isplayer)
-                    print("----------------------")
-                else:
-                    print(u.name,isplayer) #displays more info upon user entering info
-        else:
-            print("Invalid",obj)
->>>>>>> origin/master
     
 #uses an item
 def use(item,unit):

@@ -17,7 +17,7 @@ askmsg = "Enter your class (mage,knight,myrmidon) or info for more info:\n"
 
 #----common weapons and items----#
 iron_lance = Weapon("Iron Lance",7,8,45,80,"Lance",100)
-silver_lance = Weapon("Silver Lance",13,10,20,75,"Lance",100)
+silver_lance = Weapon("Silver Lance",14,10,20,75,"Lance",100)
 fire = Weapon("Fire",5,4,40,95,"Anima",100,0,1,True,"",2)
 slim_sword = Weapon("Slim Sword",3,2,35,100,"Sword",200,5)
 steel_sword = Weapon("Steel Sword",8,10,30,80,"Sword",200)
@@ -38,17 +38,13 @@ wall = Terrain("Wall","=",0,0,0)
 while askingclass:
     playerclass = input(askmsg)
     if playerclass.lower() == "mage":
-        player = Mage(name,18,5,6,6,6,2,5,4,[copy.deepcopy(fire)],[60,40,55,55,55,15,50])
+        player = Mage(name,18,5,7,6,6,2,5,4,[copy.deepcopy(fire)],[60,40,55,55,55,15,50])
         askingclass = False
     if playerclass.lower() == "knight":
-        player = Knight(name,21,7,4,4,3,7,1,10,[copy.deepcopy(iron_lance)],[80,55,40,30,30,60,15])
+        player = Knight(name,21,7,4,4,3,7,1,10,[copy.deepcopy(iron_lance)],[80,55,40,30,30,55,15])
         askingclass = False
     if playerclass.lower() == "myrmidon":
-<<<<<<< HEAD
-        player = Myrmidon(name,20,5,7,7,5,3,2,5,[copy.deepcopy(slim_sword)],[70,40,60,60,45,20,20])
-=======
-        player = Myrmidon(name,20,5,7,7,4,3,2,5,[copy.deepcopy(slim_sword)],[70,40,60,60,45,20,20])
->>>>>>> origin/master
+        player = Myrmidon(name,20,5,7,8,5,3,3,5,[copy.deepcopy(slim_sword)],[70,35,60,60,45,20,20])
         askingclass = False
     if playerclass.lower() == "info":
         print("""Mage - A speedy and accurate user of anima magic. Can't really take physical hits, although magical defense is high. Melts enemies with low resistance.
@@ -123,11 +119,8 @@ while running:
         enemies.append(enemy3)
         #creates boss
         boss = Brigand("Bandit 1",28,8,4,4,0,5,1,8,[copy.deepcopy(iron_axe)])
-        boss.fightQuote = "I serve the mighty Alex Legion! You won't stop me!\nYoyo: You will pay for your iniquities!"
-<<<<<<< HEAD
-        boss.deathQuote = "Ugh... How could I die... to a pampered lord..ling..."
-=======
->>>>>>> origin/master
+        boss.fightQuote = "I serve the mighty Alex Legion! You won't stop me!"
+        boss.deathQuote = "Ugh... How could I die... to a pampered lord..ling... and some hobo..."
         boss.name = "Alex the Bandit"
         boss.canLevel = False
         boss.canMove = False
@@ -169,27 +162,29 @@ while running:
         chapter = 1 #chapter we're on
         turn = 1
         #creating franny
-        franny = Cavalier("Franny",22,6,8,8,5,5,3,8,[copy.deepcopy(iron_lance),copy.deepcopy(iron_sword),copy.deepcopy(vulnerary)],[85,35,55,55,40,35,25])
-        franny.level = 3
+        franny = Cavalier("Franny",22,6,7,8,4,4,2,8,[copy.deepcopy(iron_lance),copy.deepcopy(iron_sword),copy.deepcopy(vulnerary)],[85,35,55,55,40,30,20])
+        franny.deathQuote = "Por qué yo? Lo siento... Señor You...Albert..y cabrón Gary..."
         franny.sym = "F"
         franny.x = 3
         franny.y = 7
         allies.append(franny)
         #creating albert
-        albert = Paladin("Albert",32,12,15,13,6,12,10,10,[copy.deepcopy(steel_sword),copy.deepcopy(silver_lance),copy.deepcopy(vulnerary)],[45,30,35,35,20,25,15])
+        albert = Paladin("Albert",32,12,15,13,6,12,10,10,[copy.deepcopy(steel_sword),copy.deepcopy(silver_lance),copy.deepcopy(vulnerary)],[45,30,40,30,20,25,15])
+        albert.deathQuote = "How could you let me die to these skrubs? I'M OP! Nooobs....Ugh"
         albert.sym = "A"
         albert.x = 4
         albert.y = 7
         allies.append(albert)
         #creating gary
-        gary = Fighter("Gary",28,8,6,5,3,5,0,13,[copy.deepcopy(iron_axe),copy.deepcopy(vulnerary)],[90,60,45,35,30,45,10])
-        gary.level = 3
+        gary = Fighter("Gary",28,8,7,5,4,5,0,13,[copy.deepcopy(iron_axe),copy.deepcopy(vulnerary)],[90,55,45,35,30,45,10])
+        gary.deathQuote = "Keklol... about time I got shut down... GG.. W..P... (rip)"
         gary.sym = "G"
         gary.x = 3
         gary.y = 6
         allies.append(gary)
         #creating henning
         henning = Transporter("Henning",25,1,13,13,10,8,8,25,[],[100,100,100,100,0,100,90])
+        henning.deathQuote = "#@$!#@@$!! I better leave before our #@!$ gets stolen! Sorry guys! I'll be back later!"
         henning.sym = "H"
         henning.x = 3
         henning.y = 5
@@ -199,19 +194,17 @@ while running:
         yoyo.x = 4
         yoyo.y = 6
         chapter1Story(player.name)
-        #creating enemy1
+        #creating brigand
         enemy1 = Brigand("Bandit 1",24,6,3,2,0,4,0,10,[copy.deepcopy(iron_axe)])
         enemy1.sym = "E"
         enemy1.x = 10
         enemy1.y = 5
-<<<<<<< HEAD
         enemy1.gift = 50
         enemy1.canLevel = False
         enemies.append(enemy1)
-        #creating 25 clones
-        clone_loc = [(11,5,"€"),(11,6,"ε"),(11,7,"É"),(10,6,"È"),(10,7,"Ê"),(15,8,"Ë"),(15,9,"e"),(14,9,"é"),
-                     (15,10,"è"),(15,8,"ê"),(15,7,"ë"),(8,14,"£"),(8,13,"غ"),(5,14,"ع"),(13,13,"℥"),(12,13,"ℯ"),
-                     (0,0,"ℰ"),(0,1,"φ"),(0,3,"θ"),(0,4,"μ"),(0,5,"ζ"),(10,10,"π"),(19,5,"Ξ"),(19,6,"Λ"),(19,7,"Σ")]
+        #creating brigand clones
+        clone_loc = [(11,5,"€"),(11,6,"ε"),(11,7,"É"),(10,6,"È"),(10,7,"Ê"),(15,8,"Ë"),(5,14,"ع"),(13,13,"℥"),(12,13,"ℯ"),
+                     (0,0,"ℰ"),(0,1,"φ"),(0,3,"θ"),(0,4,"μ"),(0,5,"ζ"),(10,10,"π")]
         name_n = 2
         for x,y,sym in clone_loc:
             enemy_clone = copy.deepcopy(enemy1)
@@ -221,27 +214,26 @@ while running:
             enemy_clone.name = "Bandit "+str(name_n)
             name_n += 1
             enemies.append(enemy_clone)
-=======
-<<<<<<< HEAD
+        #creating mercenary
+        mercenary = Mercenary("Mercenary 1",20,5,5,6,2,2,0,5,[copy.deepcopy(iron_sword)])
+        mercenary.sym = "e"
+        enemy1.x = 15
+        enemy1.y = 9
         enemy1.gift = 50
         enemy1.canLevel = False
-        enemies.append(enemy1)
-        #creating 24 clones
-        clone_loc = [(11,5),(11,6),(11,7),(10,6),(10,7),(15,8),(15,9),(14,9),
-                     (15,10),(15,8),(15,7),(8,14),(8,13),(5,14),(13,13),(12,13),
-                     (0,0),(0,1),(0,3),(0,4),(0,5),(10,10),(19,5),(19,6),(19,7)]
+        enemies.append(mercenary)
         name_n = 2
-        for x,y in clone_loc:
-            enemy_clone = copy.deepcopy(enemy1)
+        #creating mercenary clones
+        clone_loc = [(14,9,"é"),(15,10,"è"),(15,8,"ê"),(15,7,"ë"),(8,14,"£"),(8,13,"غ")]
+        for x,y,sym in clone_loc:
+            enemy_clone = copy.deepcopy(mercenary)
             enemy_clone.x = x
             enemy_clone.y = y
-            enemy_clone.name = "Bandit "+str(name_n)
+            enemy_clone.sym = sym
+            enemy_clone.name = "Mercenary "+str(name_n)
             name_n += 1
             enemies.append(enemy_clone)
-=======
-        enemies.append(enemy1)
->>>>>>> origin/master
->>>>>>> origin/master
+        boss2 = Mercenary("Alex the Mercenary",25,7,10,10,5,5,2,8,[copy.deepcopy(steel_sword),copy.deepcopy(vulnerary)])
         reg_map = copy.deepcopy(lvl2map)
         stat_map = copy.deepcopy(lvl2map)
         movers = [u for u in allies]
@@ -330,7 +322,8 @@ while running:
             if not e.alive:
                 enemies.remove(e)
                 reg_map[len(reg_map)-1-e.y][e.x] = stat_map[len(stat_map)-1-e.y][e.x]
-            attackers.remove(a) #makes sure each unit can only attack once per turn
+            if a in attackers:
+                attackers.remove(a) #makes sure each unit can only attack once per turn
             print(a.name,"can no longer make an action until you end the turn")
             if a in movers:
                 movers.remove(a)
@@ -345,21 +338,28 @@ while running:
                 userwants = True #does user want to proceed?
                 if a == "cancel":
                     userwants = False
+                    asking = False
                 if not a:
                     print("No allies")
                     userwants = False
                 if userwants:
                     a.display()
+                    asking = False
             if disp.lower() == "enemy":
                 e = askUser("Select enemy to display info: ",enemies,player,"enemies",True)
                 userwants = True
                 if e == "cancel":
                     userwants = False
+                    asking = False
                 if not e:
                     print("No enemies")
                     userwants = False
                 if userwants:
                     e.display()
+                    asking = False
+            if disp.lower() == "cancel":
+                print("Cancelled")
+                asking = False
     #---------------------MAP----------------------#
     elif comm.upper() == "MAP":
         #print map
@@ -416,26 +416,10 @@ while running:
             print("No allies that can move! End your turn if you want them to!")
         if userwants:
             e_sym = [en.sym for en in enemies]
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> origin/master
->>>>>>> origin/master
             movement = a.MOVE
             if a.mounted:
                 movement = a.movesLeft
-            move_map = moveDisp(a.x,a.y,movement,movement,copy.deepcopy(reg_map),e_sym,a,all_terr)
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
-            move_map = moveDisp(a.x,a.y,a.MOVE,a.MOVE,copy.deepcopy(reg_map),e_sym,a,all_terr)
->>>>>>> origin/master
->>>>>>> origin/master
->>>>>>> origin/master
+            move_map = moveDisp(a.x,a.y,movement,movement,copy.deepcopy(reg_map),e_sym,a,all_terr,stat_map)
             print("==================LEGEND==================")
             showMap(move_map)
             line = 0
@@ -475,44 +459,50 @@ while running:
                     reg_map[len(reg_map)-a.y-1][a.x] = stat_map[len(reg_map)-a.y-1][a.x] #removes ally symbol from place moved from and reverts to normal as found on static map
                     a.move(xmove,ymove)
                     reg_map[len(reg_map)-a.y-1][a.x] = a.sym
-                    #HANDLE MOUNTED UNITS
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> origin/master
->>>>>>> origin/master
+                    #HANDLES MOUNTED UNITS
                     if not a.mounted:
                         movers.remove(a) #makes sure each ally can only move once
+                        print(a.name,"cannot move until you end your turn!")
                     else:
                         a.movesLeft -= int(move_map[len(move_map)-ymove-1][xmove])
                         if a.movesLeft < 0:
                             a.movesLeft = 0
                         if a.movesLeft == 0:
                             movers.remove(a)
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-=======
-                    movers.remove(a) #makes sure each ally can only move once
->>>>>>> origin/master
->>>>>>> origin/master
->>>>>>> origin/master
                     break
     #-------------------ITEM---------------------#
     elif comm.upper() == "ITEM":
-        u = askUser("Pick unit to view items of: ",allies+enemies,player,"units")
-        userwants = True #does user want to continue with action
-        if u == "cancel":
-            userwants = False
-        if not u:
-            print("No units")
-            userwants = False
-        if userwants:
-            print(u.name+"'s items")
-            u.show_items()
+        asking = True
+        #print enemy or ally item info
+        while asking:
+            disp = input("Display an Ally's or an Enemy's items?\n")
+            if disp.lower() == "ally":
+                a = askUser("Select ally to display items: ",allies,player,"allies")
+                userwants = True #does user want to proceed?
+                if a == "cancel":
+                    userwants = False
+                    asking = False
+                if not a:
+                    print("No allies")
+                    userwants = False
+                if userwants:
+                    a.show_items()
+                    asking = False
+            if disp.lower() == "enemy":
+                e = askUser("Select enemy to display items: ",enemies,player,"enemies",True)
+                userwants = True
+                if e == "cancel":
+                    userwants = False
+                    asking = False
+                if not e:
+                    print("No enemies")
+                    userwants = False
+                if userwants:
+                    e.show_items()
+                    asking = False
+            if disp.lower() == "cancel":
+                print("Cancelled")
+                asking = False
     #-------------------EQUIP--------------------#
     elif comm.upper() == "EQUIP":
         a = askUser("Pick ally to equip a weapon to: ",attackers,player,"allies")
@@ -527,8 +517,17 @@ while running:
             eq = askUser("Pick weapon to equip to: ",a.weapons,player,"items",True)
             if not eq:
                 print("No weapons to equip!")
-            if not eq == "cancel" and not (not eq):
+            if not eq == "cancel" and eq:
                 a.equip_w(eq)
+                if a in movers and not a.mounted:
+                    movers.remove(a)
+                    print(a.name,"can't move until you end your turn")
+                elif a in movers and a.mounted:
+                    a.movesLeft -= int(move_map[len(move_map)-ymove-1][xmove])
+                    if a.movesLeft < 0:
+                         a.movesLeft = 0
+                    if a.movesLeft == 0:
+                        movers.remove(a)
     #------------------TRADE---------------------#
     elif comm.upper() == "TRADE":
         a = askUser("Pick first ally to trade with: ",attackers,player,"allies")
@@ -581,6 +580,12 @@ while running:
                     continue
                 if not i1.name == "No item" and not i2.name == "No item":
                     a.items[a.items.index(i1)],a2.items[a2.items.index(i2)] = a2.items[a2.items.index(i2)],a.items[a.items.index(i1)]
+                    if type(i1) == Weapon:
+                        a.weapons.remove(i1)
+                        a2.weapons.append(i1)
+                    if type(i2) == Weapon:
+                        a2.weapons.remove(i2)
+                        a.weapons.append(i2)
                 elif i1.name == "No item":
                     a2.remove_item(i2,False)
                     a.add_item(i2,False)
@@ -588,6 +593,15 @@ while running:
                     a2.add_item(i1,False)
                     a.remove_item(i1,False)
                 print("Traded",a.name,"'s",i1.name,"with",a2.name,"'s",i2.name)
+                if a in movers and not a.mounted:
+                    movers.remove(a)
+                    print(a.name,"can't move until you end your turn")
+                elif a in movers and a.mounted:
+                    a.movesLeft -= int(move_map[len(move_map)-ymove-1][xmove])
+                    if a.movesLeft < 0:
+                         a.movesLeft = 0
+                    if a.movesLeft == 0:
+                        movers.remove(a)
                 if i1 == a.equip:
                     a.equip = Weapon("No weapon",0,0,0,0,"",0)
                     #If item selected is equipped item
@@ -644,7 +658,6 @@ while running:
                 userwants = False
         if userwants:
             if use(i,a) == -1:
-<<<<<<< HEAD
                 a.remove_item(i,False) #removes users item
             attackers.remove(a)
             print(a.name,"cannot perform an action until you end your turn!")
@@ -719,19 +732,6 @@ while running:
         else:
             if userwants:
                 print("Sorry,",a.name,"is not adjacent to Henning, so,",a.name,"cannot transfer items")
-=======
-<<<<<<< HEAD
-                a.remove_item(i,False) #removes users item
-=======
-<<<<<<< HEAD
-                a.remove_item(i,False) #removes users item
-=======
-                a.items.remove(i) #removes users item
->>>>>>> origin/master
->>>>>>> origin/master
-            attackers.remove(a)
-            print(a.name,"cannot perform an action until you end your turn!")
->>>>>>> origin/master
     #----------------TERRAIN-----------------#
     elif comm.upper() == "TERRAIN":
         u = askUser("Pick unit to view terrain of: ",allies+enemies,player,"units")
@@ -771,16 +771,12 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
             print(e.name,"has started")
             canEnAttack = False #can enemy attack?
             allies_sym = [a.sym for a in allies]
-            e_movemap = moveDisp(e.x,e.y,e.MOVE,e.MOVE,copy.deepcopy(reg_map),allies_sym,e,all_terr)
-<<<<<<< HEAD
+            e_movemap = moveDisp(e.x,e.y,e.MOVE,e.MOVE,copy.deepcopy(reg_map),allies_sym,e,all_terr,stat_map)
             moveable = [(e.x,e.y)] #enemies movable squares
-=======
-            moveable = [] #enemies movable squares
->>>>>>> origin/master
             attackableAllies = [] #attackable Allies
             for y in range(len(e_movemap)):
                 for x in range(len(e_movemap[0])):
-                    if e_movemap[len(e_movemap) - 1 - y][x] in [str(i) for i in range(0,12)]+[e.sym]:
+                    if e_movemap[len(e_movemap) - 1 - y][x] in [str(i) for i in range(0,12)]:
                         moveable.append((x,y))        
                         en = copy.deepcopy(e)
                         en.x = x
@@ -864,12 +860,8 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                     movers.append(a)
                 if a.mounted:
                     a.movesLeft = a.MOVE
-<<<<<<< HEAD
         if not lose:
             print("==============PLAYER PHASE================")
-=======
-        print("==============PLAYER PHASE================")
->>>>>>> origin/master
     #----------------INVALIDE-------------#
     else:
         print("Invalid command. Type HELP for help.")
