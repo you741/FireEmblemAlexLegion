@@ -76,3 +76,9 @@ class Terrain:
         self.avo = avo
         self.defen = defen
         self.hind = hind
+    def display(self):
+        print(self.name,"terrain")
+        print(self.sym)
+        print("--STAT BONUSES--")
+        print("Avoid:",self.avo)
+        print("Defense:",self.defen)

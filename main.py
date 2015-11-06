@@ -74,6 +74,10 @@ while running:
     #---------Prologue initialization-------#
     if chapter == 0 and start:
         #chapter 0 initialization
+        player.level = 1
+        player.hp = player.maxhp
+        for i in player.items:
+            i.dur = i.maxdur
         player.sym = "P"
         player.x = 3
         player.y = 2
@@ -197,6 +201,7 @@ while running:
         #creating brigand
         enemy1 = Brigand("Bandit 1",24,6,3,2,0,4,0,10,[copy.deepcopy(iron_axe)])
         enemy1.sym = "E"
+        enemy1.level = 3
         enemy1.x = 10
         enemy1.y = 5
         enemy1.gift = 50
@@ -217,6 +222,7 @@ while running:
         #creating mercenary
         mercenary = Mercenary("Mercenary 1",20,5,5,6,2,2,0,5,[copy.deepcopy(iron_sword)])
         mercenary.sym = "e"
+        enemy1.level = 3
         enemy1.x = 15
         enemy1.y = 9
         enemy1.gift = 50
@@ -233,7 +239,15 @@ while running:
             enemy_clone.name = "Mercenary "+str(name_n)
             name_n += 1
             enemies.append(enemy_clone)
-        boss2 = Mercenary("Alex the Mercenary",25,7,10,10,5,5,2,8,[copy.deepcopy(steel_sword),copy.deepcopy(vulnerary)])
+        boss = Mercenary("Alex the Mercenary",25,7,10,10,5,5,2,8,[copy.deepcopy(steel_sword),copy.deepcopy(vulnerary)])
+        boss.x = 19
+        boss.y = 14
+        boss.fightQuote = "Fear my sword!"
+        boss.deathQuote = "Careful King Alex... They are... strong..."
+        boss.level = 5
+        boss.canLevel = False
+        boss.gift = 80
+        enemies.append(boss)
         reg_map = copy.deepcopy(lvl2map)
         stat_map = copy.deepcopy(lvl2map)
         movers = [u for u in allies]
@@ -248,7 +262,24 @@ while running:
         showMap(reg_map)
         print("==================LEGEND==================")
         line = 0
-        for u in allies+enemies+all_terr:
+        print("------------------ALLIES------------------")
+        for u in allies:
+            line += 1
+            print(u.sym,"=",u.name,end=" | ")
+            if line % 5 == 0:
+                print("\n")#creates new line whenever 5 is reached in a line
+        print("\n")
+        line = 0
+        print("------------------ENEMIES------------------")
+        for u in enemies:
+            line += 1
+            print(u.sym,"=",u.name,end=" | ")
+            if line % 5 == 0:
+                print("\n")#creates new line whenever 5 is reached in a line
+        print("\n")
+        line = 0
+        print("------------------TERRAIN------------------")
+        for u in all_terr:
             line += 1
             print(u.sym,"=",u.name,end=" | ")
             if line % 5 == 0:
@@ -334,29 +365,20 @@ while running:
         while asking:
             disp = input("Display an Ally or an Enemy?\n")
             if disp.lower() == "ally":
-                a = askUser("Select ally to display info: ",allies,player,"allies")
-                userwants = True #does user want to proceed?
-                if a == "cancel":
-                    userwants = False
-                    asking = False
-                if not a:
-                    print("No allies")
-                    userwants = False
-                if userwants:
-                    a.display()
-                    asking = False
+                u = askUser("Select ally to display info: ",allies,player,"allies")
+                
             if disp.lower() == "enemy":
-                e = askUser("Select enemy to display info: ",enemies,player,"enemies",True)
-                userwants = True
-                if e == "cancel":
-                    userwants = False
-                    asking = False
-                if not e:
-                    print("No enemies")
-                    userwants = False
-                if userwants:
-                    e.display()
-                    asking = False
+                u = askUser("Select enemy to display info: ",enemies,player,"enemies",True)
+            userwants = True
+            if u == "cancel":
+                userwants = False
+                asking = False
+            if not u:
+                print("No enemies")
+                userwants = False
+            if userwants:
+                u.display()
+                asking = False
             if disp.lower() == "cancel":
                 print("Cancelled")
                 asking = False
@@ -366,7 +388,24 @@ while running:
         showMap(reg_map)
         print("==================LEGEND==================")
         line = 0
-        for u in allies+enemies+all_terr:
+        print("------------------ALLIES------------------")
+        for u in allies:
+            line += 1
+            print(u.sym,"=",u.name,end=" | ")
+            if line % 5 == 0:
+                print("\n")#creates new line whenever 5 is reached in a line
+        print("\n")
+        line = 0
+        print("------------------ENEMIES------------------")
+        for u in enemies:
+            line += 1
+            print(u.sym,"=",u.name,end=" | ")
+            if line % 5 == 0:
+                print("\n")#creates new line whenever 5 is reached in a line
+        print("\n")
+        line = 0
+        print("------------------TERRAIN------------------")
+        for u in all_terr:
             line += 1
             print(u.sym,"=",u.name,end=" | ")
             if line % 5 == 0:
@@ -420,14 +459,32 @@ while running:
             if a.mounted:
                 movement = a.movesLeft
             move_map = moveDisp(a.x,a.y,movement,movement,copy.deepcopy(reg_map),e_sym,a,all_terr,stat_map)
-            print("==================LEGEND==================")
             showMap(move_map)
+            print("==================LEGEND==================")
             line = 0
-            for u in allies+enemies+all_terr:
+            print("------------------ALLIES------------------")
+            for u in allies:
                 line += 1
                 print(u.sym,"=",u.name,end=" | ")
                 if line % 5 == 0:
                     print("\n")#creates new line whenever 5 is reached in a line
+            print("\n")
+            line = 0
+            print("------------------ENEMIES------------------")
+            for u in enemies:
+                line += 1
+                print(u.sym,"=",u.name,end=" | ")
+                if line % 5 == 0:
+                    print("\n")#creates new line whenever 5 is reached in a line
+            print("\n")
+            line = 0
+            print("------------------TERRAIN------------------")
+            for u in all_terr:
+                line += 1
+                print(u.sym,"=",u.name,end=" | ")
+                if line % 5 == 0:
+                    print("\n")#creates new line whenever 5 is reached in a line
+            print("\n")
             print("# = movable square")
             print("\n")
             while True:
@@ -477,29 +534,19 @@ while running:
         while asking:
             disp = input("Display an Ally's or an Enemy's items?\n")
             if disp.lower() == "ally":
-                a = askUser("Select ally to display items: ",allies,player,"allies")
-                userwants = True #does user want to proceed?
-                if a == "cancel":
-                    userwants = False
-                    asking = False
-                if not a:
-                    print("No allies")
-                    userwants = False
-                if userwants:
-                    a.show_items()
-                    asking = False
+                u = askUser("Select ally to display items: ",allies,player,"allies")
             if disp.lower() == "enemy":
-                e = askUser("Select enemy to display items: ",enemies,player,"enemies",True)
-                userwants = True
-                if e == "cancel":
-                    userwants = False
-                    asking = False
-                if not e:
-                    print("No enemies")
-                    userwants = False
-                if userwants:
-                    e.show_items()
-                    asking = False
+                u = askUser("Select enemy to display items: ",enemies,player,"enemies",True)
+            userwants = True #does user want to proceed?
+            if u == "cancel":
+                userwants = False
+                asking = False
+            if not u:
+                print("No",disp.lower())
+                userwants = False
+            if userwants:
+                u.show_items()
+                asking = False    
             if disp.lower() == "cancel":
                 print("Cancelled")
                 asking = False
@@ -540,11 +587,11 @@ while running:
         if userwants:
             tradable_allies = [al for al in allies if al != a and (abs(a.x - al.x) + abs(a.y - al.y)) <= 1 and al.CLASS != "Transporter"]
             a2 = askUser("Pick 2nd ally to trade with: ",tradable_allies,player,"allies")
-        if not a2:
-            print("No allies to trade with",a.name,"!")
-            userwants = False
-        if a2 == "cancel":
-            userwants = False
+            if not a2:
+                print("No allies to trade with",a.name,"!")
+                userwants = False
+            if a2 == "cancel":
+                userwants = False
         if userwants:
             #fdispitem refers to the full display of an item
             #trading loop
@@ -662,90 +709,156 @@ while running:
             attackers.remove(a)
             print(a.name,"cannot perform an action until you end your turn!")
     #----------------SUPPLY------------------#
-    elif comm.upper() == "SUPPLY":
-        a = askUser("Pick ally to get supplies from Henning: ",allies,player,"allies")
-        userwants = True
-        if not a or a == "cancel":
-            userwants = False
-        if abs(a.x - henning.x) + abs(a.y - henning.y) <= 1 and userwants:
-            askingSupp = True #asking for supply info
-            while askingSupp:
-                askingGT = True
-                while askingGT:
-                    action = input("Give or take from Henning?\n")
-                    if action.lower() == "give":
-                        if len(a.items) <= 0:
-                            print(a.name,"has no items!")
-                            continue
-                        if henning.convoyLen() >= 100:
-                            print("Henning has no space in his caravan!")
-                            continue
-                        action = action.lower()
-                        askingGT = False
-                        break
-                    elif action.lower() == "take":
-                        if henning.convoyLen() <= 0:
-                            print("Henning has no items!")
-                            continue
-                        if len(a.items) >= 5:
-                            print(a.name,"has a full inventory!")
-                            continue
-                        action = action.lower()
-                        askingGT = False
-                        break
-                    elif action.lower() == "cancel":
-                        askingGT = False
-                        askingSupp = False
-                        print("Cancelled")
-                    else:
-                        print("Invalid input. Type 'give' or 'take'")
-                if action == "give":
-                    i = askUser("Select item from "+a.name+": ",a.items,player,"ITEMS",True)
-                    if not i:
-                        print("No items!")
-                        continue
-                    if i == "cancel":
-                        continue
-                    i2 = henning.transfer(i,True)
-                    a.remove_item(i)
-                    print("Transferred",i.name,"to Henning")
-                if action == "take":
-                    i = askUser("Select item to take from Henning: ",henning.convoy,player,"HENNING STORAGE",True)
-                    if not i:
-                        print("No items in Henning's convoy!")
-                        continue
-                    if i == "cancel":
-                        continue
-                    i2 = henning.transfer(i)
-                    if not i2:
-                        pass
-                    else:
-                        a.add_item(i2)
-                if askingSupp:
-                    cont = input("Continue transferring items from Henning's convoy? [Y/N]\n")
-                    if cont.lower() in ["y","yes","affirmative","sure","ok","yeah"]:
-                        continue
-                    else:
-                        askingGT = False
-                        askingSupp = False
-                        break
-        else:
+    elif comm.upper() == "SUPPLY" and chapter > 0:
+        if henning in allies:
+            a = askUser("Pick ally to get supplies from Henning: ",allies,player,"allies")
+            userwants = True
+            if not a or a == "cancel":
+                userwants = False
             if userwants:
-                print("Sorry,",a.name,"is not adjacent to Henning, so,",a.name,"cannot transfer items")
+                if abs(a.x - henning.x) + abs(a.y - henning.y) <= 1:
+                    askingSupp = True #asking for supply info
+                    while askingSupp:
+                        askingGT = True
+                        while askingGT:
+                            action = input("Give or take from Henning?\n")
+                            if action.lower() == "give":
+                                if len(a.items) <= 0:
+                                    print(a.name,"has no items!")
+                                    continue
+                                if henning.convoyLen() >= 100:
+                                    print("Henning has no space in his caravan!")
+                                    continue
+                                action = action.lower()
+                                askingGT = False
+                                break
+                            elif action.lower() == "take":
+                                if henning.convoyLen() <= 0:
+                                    print("Henning has no items!")
+                                    continue
+                                if len(a.items) >= 5:
+                                    print(a.name,"has a full inventory!")
+                                    continue
+                                action = action.lower()
+                                askingGT = False
+                                break
+                            elif action.lower() == "cancel":
+                                askingGT = False
+                                askingSupp = False
+                                print("Cancelled")
+                            else:
+                                print("Invalid input. Type 'give' or 'take'")
+                        if action == "give":
+                            i = askUser("Select item from "+a.name+": ",a.items,player,"ITEMS",True)
+                            if not i:
+                                print("No items!")
+                                continue
+                            if i == "cancel":
+                                continue
+                            i2 = henning.transfer(i,True)
+                            a.remove_item(i)
+                            print("Transferred",i.name,"to Henning")
+                        if action == "take":
+                            i = askUser("Select item to take from Henning: ",henning.convoy,player,"HENNING STORAGE",True)
+                            if not i:
+                                print("No items in Henning's convoy!")
+                                continue
+                            if i == "cancel":
+                                continue
+                            i2 = henning.transfer(i)
+                            if not i2:
+                                pass
+                            else:
+                                a.add_item(i2)
+                        if askingSupp:
+                            cont = input("Continue transferring items from Henning's convoy? [Y/N]\n")
+                            if cont.lower() in ["y","yes","affirmative","sure","ok","yeah"]:
+                                continue
+                            else:
+                                askingGT = False
+                                askingSupp = False
+                                break
+                else:
+                    print("Sorry,",a.name,"is not adjacent to Henning, so,",a.name,"cannot transfer items")
+        else:
+            print("Henning isn't in this fight...")
     #----------------TERRAIN-----------------#
     elif comm.upper() == "TERRAIN":
-        u = askUser("Pick unit to view terrain of: ",allies+enemies,player,"units")
-        userwants = True #does user want to continue with action
-        if u == "cancel":
-            userwants = False
-        if not u:
-            print("No units")
-            userwants = False
-        if userwants:
-            for t in all_terr:
-                if t.sym == stat_map[len(stat_map) - 1 - u.y][u.x]:
-                    print(u.name,"is standing on a",t.name,"terrain")
-                    break
+        asking = True
+        #print enemy or ally item info
+        while asking:
+            disp = input("Display an Ally's or an Enemy's terrain?\n")
+            if disp.lower() == "ally":
+                u = askUser("Select ally to display terrain: ",allies,player,"allies")
+            if disp.lower() == "enemy":
+                u = askUser("Select enemy to display terrain: ",enemies,player,"enemies",True)
+            userwants = True #does user want to proceed?
+            if u == "cancel":
+                userwants = False
+                asking = False
+            if not u:
+                print("No",disp.lower())
+                userwants = False
+            if userwants:
+                for t in all_terr:
+                    if t.sym == stat_map[len(stat_map) - 1 - u.y][u.x]:
+                        print(u.name,"is standing on: ")
+                        t.display()
+                asking = False    
+            if disp.lower() == "cancel":
+                print("Cancelled")
+                asking = False
+    #-----------------SHOWMOVE------------#
+    elif comm.upper() == "SHOWMOVE":
+        asking = True
+        #print enemy or ally item info
+        while asking:
+            disp = input("Display an Ally's or an Enemy's terrain?\n")
+            if disp.lower() == "ally":
+                u = askUser("Select ally to display movement ",allies,player,"allies")
+            if disp.lower() == "enemy":
+                u = askUser("Select enemy to display movement ",enemies,player,"enemies",True)
+            userwants = True #does user want to proceed?
+            if u == "cancel":
+                userwants = False
+                asking = False
+            if not u:
+                print("No",disp.lower())
+                userwants = False
+            if userwants:
+                cantmove = enemies if u in allies else allies
+                cantmove = [u.sym for u in cantmove]
+                move_map = moveDisp(u.x,u.y,u.MOVE,u.MOVE,copy.deepcopy(reg_map),cantmove,u,all_terr,stat_map)
+                showMap(move_map)
+                print("==================LEGEND==================")
+                line = 0
+                print("------------------ALLIES------------------")
+                for u in allies:
+                    line += 1
+                    print(u.sym,"=",u.name,end=" | ")
+                    if line % 5 == 0:
+                        print("\n")#creates new line whenever 5 is reached in a line
+                print("\n")
+                line = 0
+                print("------------------ENEMIES------------------")
+                for u in enemies:
+                    line += 1
+                    print(u.sym,"=",u.name,end=" | ")
+                    if line % 5 == 0:
+                        print("\n")#creates new line whenever 5 is reached in a line
+                print("\n")
+                line = 0
+                print("------------------TERRAIN------------------")
+                for u in all_terr:
+                    line += 1
+                    print(u.sym,"=",u.name,end=" | ")
+                    if line % 5 == 0:
+                        print("\n")#creates new line whenever 5 is reached in a line
+                print("\n")
+                asking = False    
+                if disp.lower() == "cancel":
+                    print("Cancelled")
+                    asking = False
     #------------------HELP------------------#
     elif comm.upper() == "HELP":
         print("""QUIT - leave the game (why would u do that?)
@@ -760,6 +873,7 @@ USE - Selects item to use
 TRADE - Trades items amongst allies
 SUPPLY - Take/Give items to Henning (your transporter)
 TERRAIN - Display terrain unit is on
+SHOWMOVE - Display where a unit can move
 END - Ends your turn, and then enemies can attack you. Be careful when you do this man.""")
     #------------------END----------------#
     elif comm.upper() == "END":

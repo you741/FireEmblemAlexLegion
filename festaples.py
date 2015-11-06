@@ -85,11 +85,13 @@ def askUser(ques,li,player,obj="units",nodisplayer=False,attr=""):
             print(un.display())
             print("----------------------")
         else:
-            if type(un) == Item or type(un) == Weapon:
+            if type(un) == Item or issubclass(type(un),Item):
                 if not un.dur == 0:
                     extext = str(un.dur)+"/"+str(un.maxdur)
                 else:
                     extext = ""
+            elif type(un) == Person or issubclass(type(un),Person) or issubclass(type(un),Murderer):
+                extext = str(un.hp)+"/"+str(un.maxhp)
             else:
                 extext = ""
             print(u,". ",un.name," ",extext,sep="")
