@@ -208,8 +208,7 @@ while running:
         enemy1.canLevel = False
         enemies.append(enemy1)
         #creating brigand clones
-        clone_loc = [(11,5,"€"),(11,6,"ε"),(11,7,"É"),(10,6,"È"),(10,7,"Ê"),(15,8,"Ë"),(5,14,"ع"),(13,13,"℥"),(12,13,"ℯ"),
-                     (0,0,"ℰ"),(0,1,"φ"),(0,3,"θ"),(0,4,"μ"),(0,5,"ζ"),(10,10,"π")]
+        clone_loc = [(11,5,"€"),(11,6,"ε"),(11,7,"É"),(10,6,"È"),(10,7,"Ê"),(15,8,"Ë"),(5,14,"ع"),(13,13,"℥"),(12,13,"ℯ")]
         name_n = 2
         for x,y,sym in clone_loc:
             enemy_clone = copy.deepcopy(enemy1)
@@ -222,11 +221,11 @@ while running:
         #creating mercenary
         mercenary = Mercenary("Mercenary 1",20,5,5,6,2,2,0,5,[copy.deepcopy(iron_sword)])
         mercenary.sym = "e"
-        enemy1.level = 3
-        enemy1.x = 15
-        enemy1.y = 9
-        enemy1.gift = 50
-        enemy1.canLevel = False
+        mercenary.level = 3
+        mercenary.x = 15
+        mercenary.y = 9
+        mercenary.gift = 50
+        mercenary.canLevel = False
         enemies.append(mercenary)
         name_n = 2
         #creating mercenary clones
@@ -242,10 +241,13 @@ while running:
         boss = Mercenary("Alex the Mercenary",25,7,10,10,5,5,2,8,[copy.deepcopy(steel_sword),copy.deepcopy(vulnerary)])
         boss.x = 19
         boss.y = 14
-        boss.fightQuote = "Fear my sword!"
+        boss.sym = "B"
+        boss.canMove = False
+        boss.fightQuote = "Fear the sword of mighty Alex! My blade is feared everywhere!"
         boss.deathQuote = "Careful King Alex... They are... strong..."
         boss.level = 5
         boss.canLevel = False
+        boss.guard = True
         boss.gift = 80
         enemies.append(boss)
         reg_map = copy.deepcopy(lvl2map)
@@ -349,6 +351,10 @@ while running:
                 asking = False
             if not a.alive:
                 allies.remove(a)
+                if a in attackers:
+                    attackers.remove(a)
+                if a in movers:
+                    movers.remove(a)
                 reg_map[len(reg_map)-1-a.y][a.x] = stat_map[len(stat_map)-1-a.y][a.x]
             if not e.alive:
                 enemies.remove(e)
@@ -899,9 +905,10 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                         for a in allies:
                             if en.canAtk(a) or e.canAtk(a):
                                 canEnAttack = True
-                                attackableAllies.append(a)
+                                if not a in attackableAllies:
+                                    attackableAllies.append(a)
                     
-            if not canEnAttack:
+            if not canEnAttack and not e.guard:
                 dist = []#distances from ally
                 xs = [] #x co-ords that co-respond to the distances
                 ys = [] #y co-ords that co-respond to the distances
@@ -924,7 +931,7 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                     reg_map[len(reg_map)-e.y-1][e.x] = stat_map[len(reg_map)-e.y-1][e.x] #removes enemy symbol from place moved from and reverts to normal as found on static map
                     e.move(movex,movey)
                     reg_map[len(reg_map)-e.y-1][e.x] = e.sym
-            if not e.canMove:
+            if not e.canMove and not e.guard:
                 moveable = [(e.x,e.y)]
             if canEnAttack:
                 ally_data = enemyAI(e,attackableAllies,moveable,stat_map)
@@ -954,6 +961,10 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                     reg_map[len(reg_map) - e.y - 1][e.x] = stat_map[len(stat_map) - 1 - e.y][e.x]
                 if not a.alive:
                     allies.remove(a)
+                    if a in attackers:
+                        attackers.remove(a)
+                    if a in movers:
+                        movers.remove(a)
                     reg_map[len(reg_map) - a.y - 1][a.x] = stat_map[len(stat_map) - 1 - a.y][a.x]
             if not yoyo.alive or not player.alive:
                 lose = True

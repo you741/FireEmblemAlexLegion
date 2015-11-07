@@ -63,6 +63,7 @@ class Person:
         self.caps = [40,20,20,20,20,20,20]
         self.sym = "人" #symbol as appeared on map
         self.canAttack = False
+        self.guard = False #guard means unit doesn't move unless it can attack
         self.canMove = True
         self.flying = False
         self.mountainous = False
@@ -345,7 +346,7 @@ class Murderer(Person):
                     print(enemy.name,enemy.deathQuote,sep=": ")
                 time.sleep(1)
                 print(enemy.name,"died")#if enemy dies it will print
-                expgain += enemy.gift - self.level #adds more exp when en dies
+                expgain += enemy.gift #adds more exp when en dies
             self.gainExp(expgain) #increasing exp
             self.w_experience(self.equip.wexp,self.equip.typ) #increasing wexp
             #if weapon breaks

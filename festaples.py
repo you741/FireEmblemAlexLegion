@@ -26,17 +26,18 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr,stat_map):
     #displays movement for specific units
     ym = len(grid) - 1 - y #y position on map
     map_spot = stat_map[ym][x] #current terrain on map
-    for t in all_terr:
-        if map_spot == t.sym:
-            if move-t.hind >= 0 and not ally.flying:
-                move -= t.hind
-                break#reduces movement by hindrance
-            elif move-t.hind < 0 and not ally.flying:
-                return grid
+    if move != maxmove:
+        for t in all_terr:
+            if map_spot == t.sym:
+                if move-t.hind >= 0 and not ally.flying:
+                    move -= t.hind
+                    break#reduces movement by hindrance
+                elif move-t.hind < 0 and not ally.flying:
+                    return grid
     curr_spot = grid[ym][x] #current spot on map
     if move < 0:
         return grid                #special terrain handling
-    elif curr_spot in enemies or ((not ally.waterproof or not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "&"):
+    elif curr_spot in enemies or ((not ally.waterproof and not ally.flying) and curr_spot == "-") or ((not ally.mountainous and not ally.flying) and curr_spot == "&"):
         #checks if space modified is occupied or insurpassable
         return grid                 
     elif curr_spot in [".","|","^","-","&"]:
@@ -48,7 +49,7 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr,stat_map):
             grid[ym][x] = str(maxmove-move)
     
     if not ym-1 < 0:
-            grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,ally,all_terr,stat_map)
+        grid = moveDisp(x,y+1,move-1,maxmove,grid,enemies,ally,all_terr,stat_map)
     if not ym+1 >= len(grid):
         grid = moveDisp(x,y-1,move-1,maxmove,grid,enemies,ally,all_terr,stat_map)
     if not x-1 < 0:
@@ -56,7 +57,6 @@ def moveDisp(x,y,move,maxmove,grid,enemies,ally,all_terr,stat_map):
     if not x+1 >= len(grid[0]):
         grid = moveDisp(x+1,y,move-1,maxmove,grid,enemies,ally,all_terr,stat_map)
     return grid
-
 def showMap(grid):
     for y in range(len(grid)):
         horbar = "" #horizontal bar
