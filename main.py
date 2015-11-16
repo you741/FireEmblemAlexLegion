@@ -901,14 +901,13 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                         en = copy.deepcopy(e)
                         en.x = x
                         en.y = y
-                        
                         for a in allies:
                             if en.canAtk(a) or e.canAtk(a):
                                 canEnAttack = True
                                 if not a in attackableAllies:
                                     attackableAllies.append(a)
                     
-            if not canEnAttack and not e.guard:
+            if not canEnAttack and not e.guard: #FIX THIS PATHING SYSTEM
                 dist = []#distances from ally
                 xs = [] #x co-ords that co-respond to the distances
                 ys = [] #y co-ords that co-respond to the distances
@@ -938,7 +937,7 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                 a = ally_data[4]
                 if a == 0:
                     print(e.name,"has finished turn")
-                    time.sleep(1)
+                    time.sleep(0.3)
                     continue
                 reg_map[len(reg_map)-e.y-1][e.x] = stat_map[len(reg_map)-e.y-1][e.x] #removes enemy symbol from place moved from and reverts to normal as found on static map
                 e.move(ally_data[5],ally_data[6])
@@ -971,7 +970,7 @@ END - Ends your turn, and then enemies can attack you. Be careful when you do th
                 break
             if e.alive:
                 print(e.name,"has finished turn")
-            time.sleep(1)
+            time.sleep(0.3)
         enemies = [e for e in enemies if e.alive] #removes all enemies that are dead
         for a in allies:
             if a.alive:

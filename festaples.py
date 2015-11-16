@@ -155,18 +155,29 @@ def enemyAI(enemy,allies,movable,terr_map,c=0,cna=True):
                           "Dark":"Anima",
                           "":"adfhaoijfaowiehf"}
     canAllAtk = cna #can all allies attack the enemy?
-    ally_cant = cna #can individual ally attack the enemy?
+    ally_cant = False #can individual ally attack the enemy?
     best = [] #best allies to attack - try to reduce to one
     best = [(-1,-1,999999,999999,0,0,0,0)]
     for a in allies:
+        ally_cant = False
         #----------Start of enemy's weapon selection---------#
-        #enemy try to attack with a weapon that has the mos disadvantage
+        #enemy try to attack with a weapon that has the most disadvantage
         disadv = True
         adv = False
-         #ideal weapons to use against target
-                    #(enemy damage, enemy hit %, ally damage, ally hit %, ally, enemy.x, enemy.y, enemy.weapon)
+        #ideal weapons to use against target
+        #(enemy damage, enemy hit %, ally damage, ally hit %, ally, enemy.x, enemy.y, enemy.weapon)
         ideal_weap = []
         for w in enemy.weapons:
+            validWeapon = False
+            for x,y in movable:
+                en = copy.deepcopy(enemy)
+                en.x = x
+                en.y = y
+                en.equip_w(w,False)
+                if en.canAtk(a):
+                    validWeapon = True
+            if not validWeapon:
+                continue
             if adv and weaponTriangle[w.typ] != a.equip.typ:
                 continue #will not make ideal weapon if not at advantage when another weapon is
             elif weaponTriangle[w.typ] == a.equip.typ and not adv:
@@ -201,6 +212,8 @@ def enemyAI(enemy,allies,movable,terr_map,c=0,cna=True):
                 if not en_a:
                     continue
                 a_en = a.calculate(en,eter_avo,eter_def,False,True)
+                if a_en != False and ally_cant:
+                    continue
                 if a_en != False and not canAllAtk:
                     continue #will not attack ally if another ally can't fight back
                 if not a_en:
@@ -221,18 +234,19 @@ def enemyAI(enemy,allies,movable,terr_map,c=0,cna=True):
                     #ignore this: best_allies = [b[4] for b in best]
                     best.append(comparer)
     best_allies = [] #best allies to attack
+    
     for b in best:
         if not b[4] in best_allies:
             best_allies.append(b[4])
-    if len(best) > 1 and 0 <= c < 3:
+    if len(best_allies) > 1 and 0 <= c < 3:
         #if more than one best will run function again testing the other priorities
         return enemyAI(enemy,best_allies,movable,terr_map,c+1,canAllAtk)
-    elif len(best) > 1 and c >= 3:
+    elif len(best_allies) > 1 and c >= 3:
         #if unable to reduce lower when all priorities used up, will return first value in best
         return best[0]
-    elif len(best) == 0:
+    elif len(best_allies) == 0:
         print("SOMETHING'S WRONG")
-    elif len(best) == 1:
+    elif len(best_allies) == 1:
         return best[0]
     else:
         print("LOL U MESSED")
